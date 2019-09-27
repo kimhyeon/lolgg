@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+
+    <input name="userName" type="text">
+    <button id="searchBtn">search</button>
+
+    <script>
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      var searchBtn = document.querySelector("#searchBtn"),
+        input = document.querySelector("input[name=userName]");
+
+      console.warn(searchBtn);
+
+      searchBtn.addEventListener("click", () => {
+      
+        fetch("/summoner/userName="+input.value)
+          .then((response) => {
+            console.warn(response);
+            // return response.json();
+          });
+
+      });
+
+      var event = document.createEvent('HTMLEvents');
+      event.initEvent('click', true, false);
+      
+      input.addEventListener("keyup", (e) => {
+        console.warn(e);
+
+        if(e.keyCode === 13) {
+          // no event function 으로처리 할그엇...
+          searchBtn.dispatchEvent(event);
+        }
+
+      });
+
+    });
+
+    </script>
+  </body>
+</html>
