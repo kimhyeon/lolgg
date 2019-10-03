@@ -1,3 +1,3 @@
 # lolgg
 
-for studying lol api!
+for studying lol api!!
