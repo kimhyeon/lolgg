@@ -35,7 +35,7 @@ exports.getSummonerByName = (name) => {
 
 }
 
-exports.getMatchlistsByAccount = (req, accountId) => {
+exports.getMatchlistsByAccount = (accountId) => {
     const url = "https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/",
         sendURL = `${url}${accountId}?api_key=${API_KEY}`;
     
@@ -50,11 +50,9 @@ exports.getMatchlistsByAccount = (req, accountId) => {
         maxRedirects: 10 
     },
     (error, response, body) => {
-        //let test = JSON.parse(body);
-        //console.log(test.totalGames, Object.keys(test));
-        // return JSON.parse(body);
-        req.test = JSON.parse(body);
-        console.log(req.test);
+        let test = JSON.parse(body);
+        console.log(test.totalGames, Object.keys(test));
+        return JSON.parse(body);
     });
 
 }
