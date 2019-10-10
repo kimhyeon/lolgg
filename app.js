@@ -1,15 +1,17 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var summonerRouter = require('./routes/summoner');
+const indexRouter = require('./routes/index');
+const summonerRouter = require('./routes/summoner');
 
-var cors = require('cors');
+const cors = require('cors');
 
-var app = express();
+const app = express();
+const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,6 +22,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// db
+mongoose.connect('mongodb://rasgo.iptime.org:27017/lolgg')
+  .then(() => console.log("connected mongodb succesful."))
+  .catch((err) => console.error(err));
 
 // router
 app.use('/', indexRouter);

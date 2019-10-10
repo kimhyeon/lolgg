@@ -1,59 +1,69 @@
 // /summoner
+const express = require('express');
+const router = express.Router();
 
-var express = require('express');
-var router = express.Router();
+const colors = require('colors');
 
-var request = require('request');
+const common = require('../server/common');
+const riotAPI = require('../server/riotAPI');
 
-var common = require('../server/common');
+const summonerModel = require('../model/summoner');
 
 router.get('/', (req, res) => {
   // summoner page
   res.redirect('/');
+
 });
 
-router.get(/userName=*/, (req, res) => { 
+router.get('/userName=:name', (req, res) => { 
+//router.get(/userName=*/, (req, res) => { 
   console.log("path", req.path);
-  console.log("apiKey", common.apiKey);
+  console.log("params", req.params);
+  console.log("query", req.query);
+  // console.log("apiKey", common.apiKey);
 
-  var url = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/",
-    name = req.path.substr(10);
-
+  //const url = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/",
+  let name = req.params.name;
   console.log("name", name);
-
-  var sendURL = `${url}${name}?api_key=${common.apiKey}`;
-  console.log("sendURL", sendURL);
-
-  request({ 
-    uri: sendURL, 
-    method: "GET", 
-    timeout: 10000, 
-    followRedirect: true, 
-    maxRedirects: 10 
-  },
-    function(error, response, body) { 
-      // console.log(error, response, body); 
+    
+  summonerModel.findOne({ name: name }, (err, summoner) => {
+    console.log(`find result`.cyan, summoner, !!summoner);
+        
+    if(summoner) {   
+      // check match
       
-      var url = "https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/",
-        bodyObj = JSON.parse(body),
-        accountId = bodyObj.accountId;
+      // new Promise 사용해서 처리할것....
+      var test = riotAPI.getMatchlistsByAccount(req, summoner.accountId);
 
-      var sendURL = `${url}${accountId}?api_key=${common.apiKey}`;
+      // console.log("[result]".yellow, Object.keys(result));
 
-      request({
-        uri: sendURL, 
-        method: "GET", 
-        timeout: 10000, 
-        followRedirect: true, 
-        maxRedirects: 10 
-      },
-      function(error, response, body) { 
-        res.json(JSON.parse(body));
-      });
+      console.log(req.test)
 
-    });
+    } else {
+      // save summoner
+      let api_summoner = riotAPI.getSummonerByName(name);
+      if(api_summoner) {
+        let summoner = new summonerModel({
+            profileIconId: info.profileIconId,
+            name: info.name.trim(),
+            puuid: info.puuid,
+            summonerLevel: info.summonerLevel,
+            accountId: info.accountId,
+            id: info.id,
+            revisionDate: info.revisionDate
+        });
+        summoner.save(function(err, summoner){
+            
+        if(err) return console.error(err);
+            console.log(summoner);
+        });
+      }
 
-  });
+    }
+    
+  })
+
+});
 
 module.exports = router;
 
