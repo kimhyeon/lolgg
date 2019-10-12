@@ -1,8 +1,8 @@
 const request = require('request');
 const colors = require('colors');
-const summonerModel = require('../model/summoner');
+const API_KEY = "RGAPI-0ce95819-930f-49dd-9e20-06635bc69870";
 
-const API_KEY = "RGAPI-e8b1a80a-2604-44e6-9e8f-05524187cfb6";
+const 
 
 exports.getSummonerByName = (name) => {
     let url = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/",
@@ -36,23 +36,32 @@ exports.getSummonerByName = (name) => {
 }
 
 exports.getMatchlistsByAccount = (accountId) => {
-    const url = "https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/",
-        sendURL = `${url}${accountId}?api_key=${API_KEY}`;
-    
-    console.log(`getMatchlistsByAccount(accountId=${accountId})`.blue);
-    console.log(sendURL.cyan);
+  const url = "https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/",
+    sendURL = `${url}${accountId}?api_key=${API_KEY}`;
+  
+  console.log(`getMatchlistsByAccount(accountId=${accountId})`.blue);
+  console.log(sendURL.cyan);
 
+  return new Promise((resolve, reject) => {
     request({
-        uri: sendURL, 
-        method: "GET", 
-        timeout: 10000, 
-        followRedirect: true, 
-        maxRedirects: 10 
+      uri: sendURL, 
+      method: "GET", 
+      timeout: 10000, 
+      followRedirect: true, 
+      maxRedirects: 10 
     },
     (error, response, body) => {
-        let test = JSON.parse(body);
-        console.log(test.totalGames, Object.keys(test));
-        return JSON.parse(body);
+      let test = JSON.parse(body);
+      console.log(test.totalGames, Object.keys(test));
+      
+      if(error) {
+        reject(error);
+        return;
+      }
+      resolve(JSON.parse(body));
+
     });
+
+  });
 
 }

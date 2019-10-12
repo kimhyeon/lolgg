@@ -7,7 +7,8 @@ const colors = require('colors');
 const common = require('../server/common');
 const riotAPI = require('../server/riotAPI');
 
-const summonerModel = require('../model/summoner');
+const summonerModel = require('../model/Summoner');
+const matchlistModel = require('../model/Matchlist');
 
 router.get('/', (req, res) => {
   // summoner page
@@ -30,14 +31,42 @@ router.get('/userName=:name', (req, res) => {
     console.log(`find result`.cyan, summoner, !!summoner);
         
     if(summoner) {   
-      // check match
-      
-      // new Promise 사용해서 처리할것....
-      var test = riotAPI.getMatchlistsByAccount(req, summoner.accountId);
+      // check matchlist
+      matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
+        console.log("matchlist".red, !!matchlist.length, matchlist);
 
-      // console.log("[result]".yellow, Object.keys(result));
+        if(matchlist.length) {
 
-      console.log(req.test)
+        } else {
+          // save matchlist
+          riotAPI.getMatchlistsByAccount(summoner.accountId)
+          .then((resolveData) => {
+            console.log("[result]".yellow, Object.keys(resolveData));
+            console.log(resolveData.totalGames);
+
+            let matchlist = new matchlistModel({
+              accountId: summoner.accountId,
+              matches: resolveData.matches,
+              totalGames: resolveData.totalGames,
+              startIndex: resolveData.startIndex,
+              endIndex: resolveData.endIndex
+            });
+
+            //TypeError: matchlistModel.save is not a function!!
+            matchlist.save((err, matchlist) => {
+              if(err) return console.error(err);
+              console.log(matchlist);
+            });
+
+          })
+          .catch((err) => {
+            if(err) {
+              console.log(colors.red(err));
+            }
+          });
+
+        }
+      });
 
     } else {
       // save summoner
@@ -52,10 +81,9 @@ router.get('/userName=:name', (req, res) => {
             id: info.id,
             revisionDate: info.revisionDate
         });
-        summoner.save(function(err, summoner){
-            
-        if(err) return console.error(err);
-            console.log(summoner);
+        summoner.save((err, summoner) => {
+          if(err) return console.error(err);
+          console.log(summoner);
         });
       }
 
