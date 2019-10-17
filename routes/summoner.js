@@ -10,9 +10,18 @@ const riotAPI = require('../server/riotAPI');
 const summonerModel = require('../model/Summoner');
 const matchlistModel = require('../model/Matchlist');
 
-router.get('/', (req, res) => {
+router.get(['/', '/userName', '/userName='], (req, res) => {
   // summoner page
-  res.redirect('/');
+  let temp = req.query;
+  
+  console.log(colors.magenta("summoner handler"));
+  console.log(colors.magenta(temp));
+  
+  if(temp.userName) {
+    res.redirect(`/summoner/userName=${temp.userName}`);
+  } else {
+    res.redirect('/');
+  }
 
 });
 
@@ -31,6 +40,10 @@ router.get('/userName=:name', (req, res) => {
     console.log(`find result`.cyan, summoner, !!summoner);
         
     if(summoner) {   
+      req.summoner = summoner;
+     
+      res.render("summoner/result", {name: 'Tobi', summoner: JSON.stringify(req.summoner)});
+
       // check matchlist
       matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
         console.log("matchlist".red, !!matchlist.length, matchlist);
@@ -70,22 +83,32 @@ router.get('/userName=:name', (req, res) => {
 
     } else {
       // save summoner
-      let api_summoner = riotAPI.getSummonerByName(name);
-      if(api_summoner) {
+      riotAPI.getSummonerByName(name)
+      .then((resolveData) => {
+
         let summoner = new summonerModel({
-            profileIconId: info.profileIconId,
-            name: info.name.trim(),
-            puuid: info.puuid,
-            summonerLevel: info.summonerLevel,
-            accountId: info.accountId,
-            id: info.id,
-            revisionDate: info.revisionDate
+          profileIconId: resolveData.profileIconId,
+          name: resolveData.name.trim(),
+          puuid: resolveData.puuid,
+          summonerLevel: resolveData.summonerLevel,
+          accountId: resolveData.accountId,
+          id: resolveData.id,
+          revisionDate: resolveData.revisionDate
         });
         summoner.save((err, summoner) => {
           if(err) return console.error(err);
           console.log(summoner);
+          
+          res.render("summoner/result", {summoner: summoner ? JSON.stringify(summoner) : "NO SUMMONER"});
+
         });
-      }
+
+      })
+      .catch((err) => {
+        if(err) {
+          console.log(colors.red(err));
+        }
+      });
 
     }
     
