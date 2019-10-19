@@ -2,8 +2,6 @@ const request = require('request');
 const colors = require('colors');
 const API_KEY = "RGAPI-0ce95819-930f-49dd-9e20-06635bc69870";
 
-
-
 exports.getSummonerByName = (name) => {
     let url = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/",
         sendURL = `${url}${encodeURI(name)}?api_key=${API_KEY}`;
