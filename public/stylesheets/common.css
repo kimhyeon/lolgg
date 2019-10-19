@@ -1,0 +1,8 @@
+html{font-family:sans-serif;}
+body{margin:0;}
+
+.b-wrap{min-width:1080px;min-height:100%;position:relative;overflow:hidden;}
+.b-wrap--index{background:#5383e8;}
+.summoner-search-form{position:relative;width:624px;margin:0 auto;border-radius:2px;background-color:white}
+.summoner-search-form__text-input{display:block;width:100%;padding:15px 150px 18px 17px;border:none;line-height:17px;font-size: 14px;color: #9b9b9b;box-sizing: border-box;outline: none;box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.19);}
+.summoner-search-form__submit{position:absolute;top:0;right:0;margin:10px 10px 0 0;height:30px;padding:0 10px;border:none;cursor:pointer; color: white; background-color: #00b2ff}
