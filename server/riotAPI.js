@@ -9,26 +9,33 @@ exports.getSummonerByName = (name) => {
     console.log(`getSummonerByName(name=${name})`.blue);
     console.log(sendURL.cyan);
     
-    request({ 
-        uri: sendURL, 
-        method: "GET", 
-        timeout: 10000, 
-        followRedirect: true, 
-        maxRedirects: 10 
-    }, function(error, response, body) { 
-        console.log(response.statusCode);
+    return new Promise((resolve, reject) => {
+        request({ 
+            uri: sendURL, 
+            method: "GET", 
+            timeout: 10000, 
+            followRedirect: true, 
+            maxRedirects: 10 
+        }, (error, response, body) => { 
+            console.log(response.statusCode);
+    
+            if(response.statusCode === 404) {
+                console.log("show summoner find 404 error page.");
+                // res
+            }
+    
+            if(response.statusCode === 200) {
+                let info = JSON.parse(body);
+                console.log(body.green);
+            }
 
-        if(response.statusCode === 404) {
-            console.log("show summoner find 404 error page.");
-            // res
-        }
+            if(error) {
+                reject(error);
+            }
 
-        if(response.statusCode === 200) {
-            let info = JSON.parse(body);
-            console.log(body.green);
-            return info;
-        }
-
+            resolve(JSON.parse(body));
+    
+        });
     });
 
 }
