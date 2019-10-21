@@ -7,9 +7,9 @@ var Summoner = new mongoose.Schema({
     summonerLevel: Number,
     accountId: String,
     id: String,
-    revisionDate: Number
-}, {
-    collection: 'summoner'
+    revisionDate: Number,
+    leagueEntries: Array,
+    
 });
 
 module.exports = mongoose.model('summoner', Summoner);

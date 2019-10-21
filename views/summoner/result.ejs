@@ -22,14 +22,40 @@
           </div>
           <div class="face">
             <div class="border-image"></div>
-            <img src="" alt="profile-icon">
+            <img src="https://avatar.leagueoflegends.com/KR/알리오올리오.png" alt="profile-icon">
             <span class="level"></span>
           </div>
         </div>
       </div>
     </div>
+
+    <button id="refresh" style="padding:15px;position:absolute;top:100px;" data-summoner-id="<%=summonerId%>">전적갱신</button>
+  
     <%= summoner %>
-    <%= test %>
+    
   </div>
+
 </body>
+
+<script>
+let button = document.getElementById("refresh");
+button.addEventListener("click", (e) =>{
+  console.warn(e.target.dataset.summonerId, e);
+  fetch("/summoner/ajax/renew.json/", {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({summonerId: e.target.dataset.summonerId})
+  })
+  .then((res) => {
+    console.warn(res);
+  })
+  .catch((err) => {
+    console.error(err);
+  });
+});
+</script>
+
 </html>

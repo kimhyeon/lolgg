@@ -7,7 +7,7 @@ const colors = require('colors');
 const common = require('../server/common');
 const riotAPI = require('../server/riotAPI');
 
-const summonerModel = require('../model/Summoner');
+const summonerModel = require('../model/summoner');
 const matchlistModel = require('../model/Matchlist');
 
 router.get(['/', '/userName', '/userName='], (req, res) => {
@@ -41,7 +41,7 @@ router.get('/userName=:name', (req, res) => {
     if(summoner) {   
       req.summoner = summoner;
      
-      res.render("summoner/result", {test: "QQQ", summoner: JSON.stringify(req.summoner)});
+      res.render("summoner/result", {summonerId:req.summoner.id ,summoner: JSON.stringify(req.summoner)});
 
       // check matchlist
       /*
@@ -82,25 +82,46 @@ router.get('/userName=:name', (req, res) => {
       }); */
 
     } else {
-      // save summoner
+      // save summoners
+      // save summonser-scores
       riotAPI.getSummonerByName(name)
       .then((resolveData) => {
 
-        let summoner = new summonerModel({
-          profileIconId: resolveData.profileIconId,
-          name: resolveData.name.trim(),
-          puuid: resolveData.puuid,
-          summonerLevel: resolveData.summonerLevel,
-          accountId: resolveData.accountId,
-          id: resolveData.id,
-          revisionDate: resolveData.revisionDate
-        });
-        summoner.save((err, summoner) => {
-          if(err) return console.error(err);
-          console.log(summoner);
-          
-          res.render("summoner/result", {summoner: summoner ? JSON.stringify(summoner) : "NO SUMMONER"});
+       let riotSummoner = resolveData;
+        riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
+        .then((resolveData) => {
 
+          // save
+          let summoner = new summonerModel({
+            profileIconId: riotSummoner.profileIconId,
+            name: riotSummoner.name.trim(),
+            puuid: riotSummoner.puuid,
+            summonerLevel: riotSummoner.summonerLevel,
+            accountId: riotSummoner.accountId,
+            id: riotSummoner.id,
+            revisionDate: riotSummoner.revisionDate,
+
+            leagueEntries: resolveData
+          });
+  
+          summoner.save((err, summoner) => {
+            if(err) return console.error(err);
+            console.log(summoner);
+            
+            let resData = {
+              summonerId: summoner ? null : req.summoner.id,
+              summoner:  summoner ? JSON.stringify(summoner) : "NO SUMMONER"
+            }
+
+            res.render("summoner/result", resData);
+
+          });
+
+        })
+        .catch((err) => {
+          if(err) {
+            console.log(colors.red(err));
+          }
         });
 
       })
@@ -114,6 +135,32 @@ router.get('/userName=:name', (req, res) => {
     
   })
 
+});
+
+// renew summoner
+router.post("/ajax/renew.json/", (req, res) => {
+  console.log(colors.bgCyan(JSON.stringify(req.body)));
+
+  // db update
+  summonerModel.findOne({ id: req.body.summonerId }, (err, summoner) => {
+    console.log(`find result2`.cyan, summoner, !!summoner, summoner.accountId);
+
+    riotAPI.getSummonerByEncryptedAccountId(summoner.accountId)
+    .then((resolveData) => {
+
+      // update summoners collection
+      console.log(colors.bgCyan(resolveData));
+
+    })
+    .catch((err) => {
+      if(err) {
+        console.log(colors.red(err));
+      }
+    });
+
+  });
+
+  res.json({result: 1});
 });
 
 module.exports = router;
