@@ -4,9 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <title>TEST</title>
+  <link rel='stylesheet' href='/stylesheets/common.css'/>
 </head>
 <body>
-  <%= summoner %>
+  <div class="b-wrap">
+    <%- include('../component/gnb.ejs') %>
+    <%- include('../component/menu.ejs') %>
+
+    <div class="b-container">
+      <div class="summoner-layout">
+        <div class="header">
+          <div class="past-rank">
+            <ul class="past-rank__list">
+
+            </ul>
+          </div>
+          <div class="face">
+            <div class="border-image"></div>
+            <img src="" alt="profile-icon">
+            <span class="level"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%= summoner %>
+    <%= test %>
+  </div>
 </body>
 </html>

@@ -1,0 +1,35 @@
+<div class="b-menu">
+  <ul class="menu">
+    <li class="menu__item">
+      <a href="/">홈</a>
+    </li>
+    <li class="menu__item menu__item--disable">
+      <a href="/champion/statistics">챔피언 분석</a>
+    </li>
+    <li class="menu__item menu__item--disable">
+      <a href="/statistics/champion/">통계</a>
+    </li>
+    <li class="menu__item menu__item--disable">
+      <a href="/ranking/ladder/">랭킹</a>
+    </li>
+    <li class="menu__item menu__item--disable">
+      <a href="/spectate/pro/">프로관전</a>
+    </li>
+    <li class="menu__item menu__item--disable">
+      <a href="/dummy">커뮤니티</a>
+    </li>
+  </ul>
+</div>
+
+<script>
+  // current page menu active
+  (function() {
+    let path = location.pathname,
+      menus = [].slice.call(document.querySelector("ul.menu").children);
+      menus.forEach(function(a) {
+      let menu = a.children[0],
+        href = menu.getAttribute("href");
+      (path === href) && menu.parentNode.classList.add("menu__item--active");
+    });
+  })();
+</script>

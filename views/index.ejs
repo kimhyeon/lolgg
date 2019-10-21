@@ -1,14 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko_KR">
   <head>
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/common.css' />
+    <link rel='stylesheet' href='/stylesheets/common.css'/>
   </head>
-  <body style="padding: 30px">
+  <body>
     
     <div class="b-wrap">
-      <!-- <%- include('component/gnb.ejs') %> -->
-      <%- include('component/searchbarMain.ejs') %>
+      <%- include('component/gnb.ejs') %>
+      <%- include('component/menu.ejs') %>
+
+      <div class="b-container">
+        <div class="index-logo">
+          <div id="logo">
+            <img src="/images/leesin.png">
+          </div>
+        </div>
+        <%- include('component/searchbarMain.ejs') %>
+      
+      </div>
+
 
       <div style="height: 100px;"></div>
     </div>

@@ -32,7 +32,6 @@ router.get('/userName=:name', (req, res) => {
   console.log("query", req.query);
   // console.log("apiKey", common.apiKey);
 
-  //const url = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/",
   let name = req.params.name;
   console.log("name", name);
     
@@ -42,9 +41,10 @@ router.get('/userName=:name', (req, res) => {
     if(summoner) {   
       req.summoner = summoner;
      
-      res.render("summoner/result", {name: 'Tobi', summoner: JSON.stringify(req.summoner)});
+      res.render("summoner/result", {test: "QQQ", summoner: JSON.stringify(req.summoner)});
 
       // check matchlist
+      /*
       matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
         console.log("matchlist".red, !!matchlist.length, matchlist);
 
@@ -79,7 +79,7 @@ router.get('/userName=:name', (req, res) => {
           });
 
         }
-      });
+      }); */
 
     } else {
       // save summoner
