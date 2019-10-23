@@ -10,28 +10,35 @@
 <body>
   <div class="b-wrap">
     <%- include('../component/gnb.ejs') %>
-    <%- include('../component/menu.ejs') %>
+    <%- include('../component/menu.ejs', {searchForm: searchForm}) %>
 
     <div class="b-container">
       <div class="summoner-layout">
-        <div class="header">
+        <div class="summoner-info header">
           <div class="past-rank">
             <ul class="past-rank__list">
 
             </ul>
           </div>
-          <div class="face">
-            <div class="border-image"></div>
-            <img src="https://avatar.leagueoflegends.com/KR/알리오올리오.png" alt="profile-icon">
-            <span class="level"></span>
+          <div class="summoner-info__face">
+            <div class="profile-icon">
+              <img class="profile-icon__border-image" src="/images/summoner/gold-border.png"></img>
+              <img src="http://ddragon.leagueoflegends.com/cdn/9.21.1/img/profileicon/<%=summoner.profileIconId%>.png" class="profile-icon__image" >
+              <span class="profile-icon__level"><%= summoner.summonerLevel %></span>
+            </div>
+          </div>
+          <div class="summoner-info__profile">
+            <div class="profile-info">
+              <span class="profile-info__name"><%= summoner.name %></span>   
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <button id="refresh" style="padding:15px;position:absolute;top:100px;" data-summoner-id="<%=summonerId%>">전적갱신</button>
+    <button id="refresh" style="padding:15px;position:absolute;top:100px;" data-summoner-id="<%=summoner.id%>">전적갱신</button>
   
-    <%= summoner %>
+    <%= summonerString %>
     
   </div>
 

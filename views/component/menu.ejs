@@ -18,6 +18,11 @@
     <li class="menu__item menu__item--disable">
       <a href="/dummy">커뮤니티</a>
     </li>
+
+    <% if(searchForm === true) { %>
+      <%- include('../component/gnbSearch.ejs') %>
+    <% } %>
+
   </ul>
 </div>
 
