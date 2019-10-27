@@ -14,6 +14,7 @@
 
     <div class="b-container">
       <div class="summoner-layout">
+        <!-- //header start -->
         <div class="summoner-info header">
           <div class="past-rank">
             <ul class="past-rank__list">
@@ -31,12 +32,90 @@
             <div class="profile-info">
               <span class="profile-info__name"><%= summoner.name %></span>   
             </div>
+            <div class="profile-buttons">
+              <button class="profile-button__button profile-button__button--blue" id="summonerRefreshButton" data-summoner-id="<%=summoner.id%>">전적갱신</button>
+            </div>
           </div>
         </div>
+        <!-- //header end -->
+        <!-- //tab-menu start -->
+        <div class="tab-menu">
+          <ul id="tabHeaders" class="menu-list">
+            <li id="allTab" class="menu-list__item menu-list__item--active">
+              <a href="#">종합</a>
+            </li>
+            <li id="championPage" class="menu-list__item menu-list__item--disable">
+              <a href="#">챔피언</a>
+            </li>
+          </ul>
+        </div>
+        <!-- //tab-menu end -->
+        <!-- //cntent-wrap start-->
+        <div class="content-wrap">
+          
+          <div class="summoner-layout-summary" data-tab-data-url="" style="display: block;">
+            <div class="side-content">
+              <div class="side-content__tier box" style="display: table;">
+                <div class="emblem">
+                  <% if(RANKED_SOLO) { %>
+                    <img class="emblem-box__img" src="/images/emblems/<%= RANKED_SOLO.emblem %>.png">
+                  <% } else { %>
+                    <img class="emblem-box__img" src="/images/emblems/default.png">
+                  <% } %>
+                </div>
+                <div class="tier-rank-info">
+                  <div class="tier-rank-info__rank-type">솔로랭크</div>
+
+                  <% if(RANKED_SOLO) { %>
+                    <div class="tier-rank-info__tier-rank"><%= RANKED_SOLO.tier %></div>
+                    <div class="tier-rank-info__tier-info">
+                      <span class="lp"><%= RANKED_SOLO.leaguePoints %> LP</span> / 
+                        <%= RANKED_SOLO.wins %>승 <%= RANKED_SOLO.losses %>패
+                    </div>
+                    <div class="tier-rank-info__win-rate">승률 <%= RANKED_SOLO.winRate %>%</div>
+                  <% } else { %>
+                    <div>Unranked</div>
+                  <% } %>
+                  
+                </div>
+              </div>
+              <div class="side-content__tier box">
+                <div class="emblem emblem--sub">
+
+                  <% if(RANKED_FLEX) { %>
+                    <img class="emblem-box__img" src="/images/emblems/<%= RANKED_FLEX.emblem %>.png">
+                  <% } else { %>
+                    <img class="emblem-box__img" src="/images/emblems/default.png">
+                  <% } %>
+
+                </div>
+                <div class="tier-rank-info">
+                  <div class="tier-rank-info__rank-type">자유 5:5 랭크</div>
+
+                  <% if(RANKED_FLEX) { %>
+                    <div class="tier-rank-info__tier-rank"><%= RANKED_FLEX.tier %></div>
+                    <div class="tier-rank-info__tier-info">
+                      <span class="lp"><%= RANKED_FLEX.leaguePoints %> LP</span> / 
+                        <%= RANKED_FLEX.wins %>승 <%= RANKED_FLEX.losses %>패
+                    </div>
+                    <div class="tier-rank-info__win-rate">승률 <%= RANKED_FLEX.winRate %>%</div>
+                  <% } else { %>
+                    <div>Unranked</div>
+                  <% } %>
+
+                </div>
+              </div>
+            </div>
+            <div class="main-content">
+
+            </div>
+          </div>
+        
+        </div>
+        <!-- //cntent-wrap end-->
       </div>
     </div>
 
-    <button id="refresh" style="padding:15px;position:absolute;top:100px;" data-summoner-id="<%=summoner.id%>">전적갱신</button>
   
     <%= summonerString %>
     
@@ -45,7 +124,7 @@
 </body>
 
 <script>
-let button = document.getElementById("refresh");
+let button = document.getElementById("summonerRefreshButton");
 button.addEventListener("click", (e) =>{
   console.warn(e.target.dataset.summonerId, e);
   fetch("/summoner/ajax/renew.json/", {

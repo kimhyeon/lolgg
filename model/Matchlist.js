@@ -6,8 +6,6 @@ var Matchlist = new mongoose.Schema({
   totalGames: Number,
   startIndex: Number,
   endIndex: Number
-}, {
-  collection: 'matchlist'
 });
 
 module.exports = mongoose.model('matchlist', Matchlist);

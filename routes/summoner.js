@@ -42,12 +42,42 @@ router.get('/userName=:name', (req, res) => {
         
     if(summoner) {   
       req.summoner = summoner;
-     
+      
+      let romanKey = {
+        "I": 1,
+        "II": 2,
+        "III": 3,
+        "IV": 4
+      };
+
       let resData = {
         searchForm: true,
         summoner: req.summoner,
-        summonerString: req.summoner
+        summonerString: req.summoner,
+        RANKED_SOLO: null,
+        RANKED_FLEX: null,
       }
+      
+      
+
+      summoner.leagueEntries.forEach((el) => {
+        console.log(colors.yellow(el));
+        if(el.queueType === "RANKED_SOLO_5x5" || el.queueType === "RANKED_FLEX_SR") {
+          let KEY = (el.queueType === "RANKED_SOLO_5x5") ? "RANKED_SOLO" : "RANKED_FLEX",
+            tierText = el.tier.toLocaleLowerCase();
+            
+          tierText = tierText.replace(/^./, tierText[0].toUpperCase())+" "+romanKey[el.rank];
+
+          resData[KEY] = {};
+          resData[KEY]["emblem"] = el.tier.toLocaleLowerCase()+"_"+romanKey[el.rank];
+          resData[KEY]["tier"] = tierText;
+          resData[KEY]["leaguePoints"] = el.leaguePoints;
+          resData[KEY]["wins"] = el.wins;
+          resData[KEY]["losses"] = el.losses;
+          resData[KEY]["winRate"] = Math.round(el.wins / (el.wins + el.losses) * 100);
+        } 
+
+      });
 
       res.render("summoner/result", resData);
 

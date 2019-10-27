@@ -50,3 +50,25 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 
 .summoner-info__profile{position:relative;display:inline-block;height:100px;margin:0 25px 0 25px;vertical-align:top;}
 .summoner-info__profile .profile-info__name{color:#242929;font-size:20px;font-weight:bold;margin-right:4px;vertical-align:top;}
+
+.summoner-info__profile .profile-buttons{position:absolute;left:0;right:0;bottom:0;margin:15px 0 -6px;font-size:0;white-space: nowrap;}
+.profile-buttons .profile-button__button{margin:0 6px 6px 0;padding:11px 14px 10px;border-radius:2px;font-size:14px;cursor: pointer;}
+.profile-buttons .profile-button__button.profile-button__button--blue{border:1px solid #1a78ae; background-color:#1f8ecd;color:#f2f2f2;}
+
+.summoner-layout .tab-menu{border-bottom:1px solid #c6cbcb;margin-top:25px;}
+.summoner-layout .menu-list{width:1000px;height:40px;margin:0 auto;padding:0;font-size:0;}
+.menu-list__item{display:inline-block;margin:0 -1px 0 0;padding:0;}
+.menu-list__item > a{display:block;min-width:70px;height:39px;border:1px solid #c6cbcb;padding:0 6px;background-color:#f2f2f2;color:#555e5e;font-size:13px;line-height:40px;text-decoration:none;text-align:center;}
+.menu-list__item.menu-list__item--active > a{border-bottom:1px solid #e8eaea;background-color:#e8eaea;color:#141717;}
+.menu-list__item:hover > a{background-color:#e8eaea;color:#242929;}
+.menu-list__item.menu-list__item--disable:hover>a{pointer-events:none;cursor:default;background-color:#f2f2f2;color:#555e5e;}
+
+.content-wrap .box{border: 1px solid #cdd2d2;box-shadow: 0 1px #dcdfdf;background: #f2f2f2;border-radius: 2px;}
+.summoner-layout-summary{width:1000px;min-height:500px;margin:0 auto;}
+.summoner-layout-summary .side-content{display:inline-block;width:300px;}
+.side-content__tier{margin-top:10px;font-size:12px;display:table;width:100%;}
+.emblem{width:120px;height:124px;text-align:center;display:table-cell;vertical-align:middle;}
+.emblem .emblem-box__img{width:104px;height:104px;margin:-5px 0 -10px 0;}
+.emblem--sub{height: 100px;}
+.emblem--sub .emblem-box__img{width:64px;height:64px;margin:-5px 0 -10px 0;}
+.tier-rank-info{display:table-cell;vertical-align:middle;}
