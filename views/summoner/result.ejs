@@ -55,7 +55,7 @@
           
           <div class="summoner-layout-summary" data-tab-data-url="" style="display: block;">
             <div class="side-content">
-              <div class="side-content__tier box" style="display: table;">
+              <div class="side-content__tier box">
                 <div class="emblem">
                   <% if(RANKED_SOLO) { %>
                     <img class="emblem-box__img" src="/images/emblems/<%= RANKED_SOLO.emblem %>.png">
@@ -107,7 +107,30 @@
               </div>
             </div>
             <div class="main-content">
-
+              <!-- //navigation start -->
+              <div class="navigation box">
+                <ul class="list">
+                  <li class="list__item list__item--active" data-type="total">
+                    <a class="list__item-link" href="#">전체</a>
+                  </li>
+                  <li class="list__item list__item" data-type="solorank">
+                    <a class="list__item-link" href="#">솔로랭크</a>
+                  </li>
+                  <li class="list__item list__item" data-type="flexrank">
+                    <a class="list__item-link" href="#">자유랭크</a>
+                  </li>
+                  <li class="list__item list__iteme" data-type="etc">
+                    <select name="etc">
+                        <option value="">큐타입</option>
+                        <option value="학생">일반 (비공개 선택)</option>
+                        <option value="회사원">무작위 총력전</option>
+                        <option value="기타">AI 상대 대전</option>
+                        <option value="기타">이벤트 게임</option>
+                    </select>
+                  </li>
+                </ul>
+              </div>
+              <!-- //navigation end -->
             </div>
           </div>
         

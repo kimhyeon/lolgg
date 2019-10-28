@@ -63,8 +63,8 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .menu-list__item:hover > a{background-color:#e8eaea;color:#242929;}
 .menu-list__item.menu-list__item--disable:hover>a{pointer-events:none;cursor:default;background-color:#f2f2f2;color:#555e5e;}
 
-.content-wrap .box{border: 1px solid #cdd2d2;box-shadow: 0 1px #dcdfdf;background: #f2f2f2;border-radius: 2px;}
-.summoner-layout-summary{width:1000px;min-height:500px;margin:0 auto;}
+.content-wrap .box{border: 1px solid #cdd2d2;box-shadow: 0 1px #dcdfdf;background: #f2f2f2;border-radius:2px;box-sizing:border-box;}
+.summoner-layout-summary{width:1000px;min-height:500px;margin:0 auto;font-size:0}
 .summoner-layout-summary .side-content{display:inline-block;width:300px;}
 .side-content__tier{margin-top:10px;font-size:12px;display:table;width:100%;}
 .emblem{width:120px;height:124px;text-align:center;display:table-cell;vertical-align:middle;}
@@ -72,3 +72,17 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .emblem--sub{height: 100px;}
 .emblem--sub .emblem-box__img{width:64px;height:64px;margin:-5px 0 -10px 0;}
 .tier-rank-info{display:table-cell;vertical-align:middle;}
+.tier-rank-info .tier-rank-info__rank-type{font-size:12px;color:#879292}
+.tier-rank-info .tier-rank-info__tier-rank{font-size:15px;font-weight:bold;color:#1f8ecd}
+.tier-rank-info .tier-rank-info__tier-info{color:#879292}
+.tier-rank-info .tier-rank-info__tier-info .lp{font-weight:bold;color:#555e5e}
+.tier-rank-info .tier-rank-info__win-rate{color:#879292}
+
+.main-content{display:inline-block;width:690px;margin-top:10px;margin-left:10px;font-size:12px;vertical-align:top;}
+.main-content .navigation{position:relative;border-bottom:1px solid #cdd2d2;height:35px;}
+.navigation > .list{display:block;font-size:0;padding-left:10px;}
+.navigation .list__item{font-size:12px;display:inline-block;height:32px;margin:0 10px;vertical-align:top;}
+.navigation .list__item--active{border-bottom:2px solid #1f8ecd;}
+.navigation .list__item-link{color:#555e5e;font-size:12px;line-height:36px;text-decoration:none;}
+.navigation .list__item-link:hover{color:#242929}
+.navigation .list__item.list__item--active > a{color:#1f8ecd;font-weight:bold;}
