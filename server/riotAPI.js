@@ -68,13 +68,31 @@ exports.getLeagueEntriesBySummonerId = (summonerId) => {
 
   }
 
-exports.getMatchlistsByAccount = (accountId) => {
+exports.getMatchlistsByAccount = (accountId, endTime) => {
   const url = "https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/",
-    sendURL = `${url}${accountId}?api_key=${API_KEY}`;
+    oneWeekMillisecond = 604800000,
+    beginTime = endTime - oneWeekMillisecond;
+    // sixMonthMillisecond = 2628000000;
+  
+  let sendURL = `${url}${accountId}`;
+  sendURL += `?api_key=${API_KEY}`;
+  sendURL = endTime ? sendURL + `&endTime=${endTime}&beginTime=${beginTime}` : sendURL;
   
   console.log(`getMatchlistsByAccount(accountId=${accountId})`.blue);
 
   return new Promise((resolve, reject) => {
     apiRequest(sendURL, resolve, reject);
   });
+}
+
+exports.getMatchByMatchId = (matchId) => {
+  const url = "https://kr.api.riotgames.com/lol/match/v4/matches/",
+    sendURL = `${url}${matchId}?api_key=${API_KEY}`;
+
+  console.log(`getMatchByMatchId(matchId=${matchId})`.blue);
+
+  return new Promise((resolve, reject) => {
+    apiRequest(sendURL, resolve, reject);
+  });
+  
 }

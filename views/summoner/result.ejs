@@ -23,7 +23,10 @@
           </div>
           <div class="summoner-info__face">
             <div class="profile-icon">
-              <img class="profile-icon__border-image" src="/images/summoner/gold-border.png"></img>
+              <% if(border) { %>
+                <img class="profile-icon__border-image" src="/images/border/<%= border %>.png"></img>
+              <% } %>
+
               <img src="http://ddragon.leagueoflegends.com/cdn/9.21.1/img/profileicon/<%=summoner.profileIconId%>.png" class="profile-icon__image" >
               <span class="profile-icon__level"><%= summoner.summonerLevel %></span>
             </div>
@@ -119,8 +122,8 @@
                   <li class="list__item list__item" data-type="flexrank">
                     <a class="list__item-link" href="#">자유랭크</a>
                   </li>
-                  <li class="list__item list__iteme" data-type="etc">
-                    <select name="etc">
+                  <li class="list__item list__item" data-type="etc">
+                    <select name="etc" class="list__item-queue-select">
                         <option value="">큐타입</option>
                         <option value="학생">일반 (비공개 선택)</option>
                         <option value="회사원">무작위 총력전</option>
@@ -131,6 +134,25 @@
                 </ul>
               </div>
               <!-- //navigation end -->
+              <!-- //average-stats start -->
+              <div class="average-stats">
+                <div class="match">
+                  <div class="match__stats">20전 9승 10패</div>
+                  <div class="match__graph">
+                    <div id=matchGraph>
+                      Graph HERE
+                    </div>
+                  </div>
+                  <div class="match__KDA">
+                    <div class="KDA">5.4 / 5.0 / 7.9</div>
+                    <div class="KDARatio">
+                      <span>2.65:1</span> 
+                      <span>(44%)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- //average-stats end -->
             </div>
           </div>
         

@@ -6,6 +6,7 @@ const colors = require('colors');
 
 const common = require('../server/common');
 const riotAPI = require('../server/riotAPI');
+const summonerService = require('../server/summoner');
 
 const summonerModel = require('../model/summoner');
 const matchlistModel = require('../model/Matchlist');
@@ -41,56 +42,23 @@ router.get('/userName=:name', (req, res) => {
     console.log(`find result`.cyan, summoner, !!summoner);
         
     if(summoner) {   
-      req.summoner = summoner;
-      
-      let romanKey = {
-        "I": 1,
-        "II": 2,
-        "III": 3,
-        "IV": 4
-      };
 
-      let resData = {
-        searchForm: true,
-        summoner: req.summoner,
-        summonerString: req.summoner,
-        RANKED_SOLO: null,
-        RANKED_FLEX: null,
-      }
-      
-      
-
-      summoner.leagueEntries.forEach((el) => {
-        console.log(colors.yellow(el));
-        if(el.queueType === "RANKED_SOLO_5x5" || el.queueType === "RANKED_FLEX_SR") {
-          let KEY = (el.queueType === "RANKED_SOLO_5x5") ? "RANKED_SOLO" : "RANKED_FLEX",
-            tierText = el.tier.toLocaleLowerCase();
-            
-          tierText = tierText.replace(/^./, tierText[0].toUpperCase())+" "+romanKey[el.rank];
-
-          resData[KEY] = {};
-          resData[KEY]["emblem"] = el.tier.toLocaleLowerCase()+"_"+romanKey[el.rank];
-          resData[KEY]["tier"] = tierText;
-          resData[KEY]["leaguePoints"] = el.leaguePoints;
-          resData[KEY]["wins"] = el.wins;
-          resData[KEY]["losses"] = el.losses;
-          resData[KEY]["winRate"] = Math.round(el.wins / (el.wins + el.losses) * 100);
-        } 
-
-      });
-
-      res.render("summoner/result", resData);
-
-      // check matchlist
-      /*
       matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
-        console.log("matchlist".red, !!matchlist.length, matchlist);
+        console.log("matchlist".red, !!matchlist, matchlist);
 
-        if(matchlist.length) {
+        if(matchlist) {
+          let gameId = matchlist[0].matches[0].gameId;
+          console.log("YES", gameId);
+          console.log(colors.green(gameId));
 
+          // riotAPI.getMatchByMatchId()
+
+          let resData = summonerService.getSummonerResponse(summoner);
+          res.render("summoner/result", resData);
         } else {
-          // save matchlist
-          riotAPI.getMatchlistsByAccount(summoner.accountId)
+          console.log("NO", summoner.accountId, new Date().getTime());
+
+          riotAPI.getMatchlistsByAccount(summoner.accountId, new Date().getTime())
           .then((resolveData) => {
             console.log("[result]".yellow, Object.keys(resolveData));
             console.log(resolveData.totalGames);
@@ -109,15 +77,22 @@ router.get('/userName=:name', (req, res) => {
               console.log(matchlist);
             });
 
+            let resData = summonerService.getSummonerResponse(summoner);
+            res.render("summoner/result", resData);
+
           })
           .catch((err) => {
             if(err) {
-              console.log(colors.red(err));
+              console.log(colors.red("ERROR"), Date.now());
             }
           });
 
+          // let resData = summonerService.getSummonerResponse(summoner);
+          // res.render("summoner/result", resData);
+
         }
-      }); */
+        
+      });
 
     } else {
       // save summoners
@@ -145,13 +120,15 @@ router.get('/userName=:name', (req, res) => {
             if(err) return console.error(err);
             console.log(colors.blue(summoner));
             
-            let resData = {
-              searchForm: true,
-              summoner: summoner,
-              summonerString: summoner ? JSON.stringify(summoner) : "NO SUMMONER"
-            }
+            // let resData = {
+            //   searchForm: true,
+            //   summoner: summoner,
+            //   summonerString: summoner ? JSON.stringify(summoner) : "NO SUMMONER"
+            // }
 
-            console.log(colors.yellow(resData));
+            // console.log(colors.yellow(resData));
+
+            let resData = summonerService.getSummonerResponse(summoner);
 
             res.render("summoner/result", resData);
 
@@ -174,7 +151,6 @@ router.get('/userName=:name', (req, res) => {
             searchForm: true,
             responseString: JSON.stringify(response.body)
           }
-
 
           res.render("summoner/noSummoner", resData)
         }
