@@ -11,6 +11,8 @@ const summonerService = require('../server/summoner');
 const summonerModel = require('../model/summoner');
 const matchlistModel = require('../model/Matchlist');
 
+const summonerDAO = require('../persistent/summoner')
+
 router.get(['/', '/userName', '/userName='], (req, res) => {
   // summoner page
   let temp = req.query;
@@ -38,15 +40,16 @@ router.get('/userName=:name', (req, res) => {
 
   console.log("upperCaseName", upperCaseName);
   
-  summonerModel.findOne({ upperCaseName: upperCaseName }, (err, summoner) => {
-    console.log(`find result`.cyan, summoner, !!summoner);
-        
-    if(summoner) {   
+  summonerDAO.findOne({ upperCaseName: upperCaseName })
+  .then((summoner) => {
+    console.log(`find result`.cyan, summoner, !!summoner);  
+
+    if(summoner) {
 
       matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
         console.log("matchlist".red, !!matchlist, matchlist);
 
-        if(matchlist) {
+        if(matchlist.length) {
           let gameId = matchlist[0].matches[0].gameId;
           console.log("YES", gameId);
           console.log(colors.green(gameId));
@@ -58,7 +61,7 @@ router.get('/userName=:name', (req, res) => {
         } else {
           console.log("NO", summoner.accountId, new Date().getTime());
 
-          riotAPI.getMatchlistsByAccount(summoner.accountId, new Date().getTime())
+          riotAPI.getMatchlistsByAccount(summoner.accountId)
           .then((resolveData) => {
             console.log("[result]".yellow, Object.keys(resolveData));
             console.log(resolveData.totalGames);
@@ -101,38 +104,16 @@ router.get('/userName=:name', (req, res) => {
       .then((riotSummoner) => {
         riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
 
-        .then((resolveData) => {
-          // save
-          let newSummoner = new summonerModel({
-            profileIconId: riotSummoner.profileIconId,
-            name: riotSummoner.name.trim(),
-            puuid: riotSummoner.puuid,
-            summonerLevel: riotSummoner.summonerLevel,
-            accountId: riotSummoner.accountId,
-            id: riotSummoner.id,
-            revisionDate: riotSummoner.revisionDate,
-
-            leagueEntries: resolveData,
-            upperCaseName: riotSummoner.name.trim().toUpperCase()
-          });
-  
-          newSummoner.save((err, summoner) => {
-            if(err) return console.error(err);
-            console.log(colors.blue(summoner));
-            
-            // let resData = {
-            //   searchForm: true,
-            //   summoner: summoner,
-            //   summonerString: summoner ? JSON.stringify(summoner) : "NO SUMMONER"
-            // }
-
-            // console.log(colors.yellow(resData));
-
+        .then((leagueEntries) => {
+         
+          summonerDAO.save(riotSummoner, leagueEntries)
+          .then((summoner, ) => {
             let resData = summonerService.getSummonerResponse(summoner);
-
             res.render("summoner/result", resData);
-
-          });
+          })
+          .catch((err) => {
+            
+          })
 
         })
         .catch((err) => {
@@ -142,14 +123,14 @@ router.get('/userName=:name', (req, res) => {
         });
 
       })
-      .catch((response) => {
-        if(response) {
-          // handle error pages!!!
-          console.log(colors.red(err));
+      .catch((err) => {
+        if(err) {
+          // err error pages!!!
+          // console.log(colors.red(err));
 
           let resData = {
             searchForm: true,
-            responseString: JSON.stringify(response.body)
+            responseString: JSON.stringify(err.body)
           }
 
           res.render("summoner/noSummoner", resData)
@@ -157,8 +138,11 @@ router.get('/userName=:name', (req, res) => {
       });
 
     }
-    
   })
+  .catch((err) => {
+    // summoner find error
+
+  });
 
 });
 
@@ -167,6 +151,14 @@ router.post("/ajax/renew.json/", (req, res) => {
   console.log(colors.cyan(JSON.stringify(req.body)));
 
   // db update
+
+  summonerDAO.findOne({ upperCaseName: upperCaseName })
+  .then((summoner) => {
+  
+  })
+  .catch(error)
+
+
   summonerModel.findOne({ id: req.body.summonerId }, (err, dbSummoner) => {
     console.log(`find result2`.cyan, dbSummoner, !!dbSummoner, dbSummoner.accountId);
 
@@ -180,24 +172,17 @@ router.post("/ajax/renew.json/", (req, res) => {
       riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
       .then((leagueEntries) => {
         
-        // db update
-        dbSummoner.profileIconId = riotSummoner.profileIconId;
-        dbSummoner.name = riotSummoner.name;
-        dbSummoner.puuid = riotSummoner.puuid;
-        dbSummoner.summonerLevel = riotSummoner.summonerLevel;
-        accountId = riotSummoner.accountId;
-        dbSummoner.id = riotSummoner.id;
-        dbSummoner.revisionDate = riotSummoner.revisionDate;
-        
-        dbSummoner.leagueEntries = leagueEntries;
-        dbSummoner.upperCaseName = riotSummoner.name.trim().toUpperCase();
+        riotSummoner["leagueEntries"] = leagueEntries;
+        riotSummoner["upperCaseName"] = riotSummoner.name.trim().toUpperCase();
 
-        dbSummoner.save(function(err) {
-          if(err) res.status(500).json({error: 'failed to update'});
-          
+        summonerDAO.updateOne(dbSummoner.accountId, tt)
+        .then((result) => {
           // dummy result, will be html tag result!!!
-          res.json({result: 1});
-        }); 
+          res.json({result: 1, detail: result});
+        })
+        .catch((err) => {
+          res.json({result: -1, detail: err});
+        });
 
       })
       .catch((err) => {
@@ -205,7 +190,6 @@ router.post("/ajax/renew.json/", (req, res) => {
           console.log(colors.red(err));
         }
       });
-
 
     })
     .catch((err) => {
