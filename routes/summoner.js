@@ -52,18 +52,20 @@ router.get('/userName=:name', (req, res) => {
       summonerService.saveRiotSummoner(upperCaseName)
       .then((summoner) => {
 
+        console.log(colors.bgRed(summoner.accountId));
+
         // matchlistService.saveRiotMatchlist(summoner.accountId)
         // .then((matchlist) => {
           
           
         // })
         // .catch((err) => {
-          
+        //   console.log(colors.bgRed(err.body));
         // });
         
         let resData = summonerService.getSummonerResponse(summoner);
         res.render("summoner/result", resData);
-      
+        
       })
       .catch((err) => {
 
