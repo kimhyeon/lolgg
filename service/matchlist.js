@@ -3,12 +3,12 @@ const riotAPI = require('../server/riotAPI');
 const matchListDAO = require('../persistent/matchlist');
 
 exports.getMatchlist = (accountId) => {
-  return new Promise((reesolve, reject) => {
+  return new Promise((resolve, reject) => {
   
     matchListDAO.findOne({accountId: accountId})
     .then((matchlist) => {
-      console.log(colors.bgMagenta(matchlist));
-      reesolve(matchlist);
+      console.log(colors.magenta(matchlist));
+      resolve(matchlist);
     })
     .catch((err) => {
       reject(err);
@@ -22,12 +22,13 @@ exports.saveRiotMatchlist = (accountId) => {
 
     riotAPI.getMatchlistsByAccount(accountId)
     .then((matchList) => {
-      matchListDAO.save(matchList)
+      matchListDAO.save(accountId, matchList)
       .then((matchList) => {
-        console.log(colors.green("matchList SAVE-OK"));
+        console.log(colors.green("mongodb : matchList SAVE-OK"));
         resolve(matchList);
       })
       .catch((err) => {
+        console.log(colors.red("mongodb : matchList SAVE-FAIL"));
         reject(err);
       });
     })

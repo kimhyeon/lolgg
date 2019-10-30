@@ -15,7 +15,7 @@ apiRequest = (sendURL, resolve, reject) => {
   }, (error, response, body) => { 
 
     if(response.statusCode === 200) {
-      console.log(colors.yellow(JSON.parse(body)));
+      console.log(colors.green(JSON.parse(body)));
     } else {
       console.log(colors.bgRed.white("REJECT!!!"));
       console.log(colors.red(JSON.parse(body)));    
