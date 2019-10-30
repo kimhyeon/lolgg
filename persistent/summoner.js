@@ -1,5 +1,5 @@
-const summonerModel = require('../model/summoner');
 const colors = require('colors');
+const summonerModel = require('../model/summoner');
 
 exports.findOne = (query) => {
   return new Promise((resolve, reject) => {

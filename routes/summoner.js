@@ -6,9 +6,8 @@ const colors = require('colors');
 
 const common = require('../server/common');
 const riotAPI = require('../server/riotAPI');
-const summonerService = require('../server/summoner');
+const summonerService = require('../service/summoner');
 
-const summonerModel = require('../model/summoner');
 const matchlistModel = require('../model/Matchlist');
 
 const summonerDAO = require('../persistent/summoner')
@@ -151,23 +150,14 @@ router.post("/ajax/renew.json/", (req, res) => {
   console.log(colors.cyan(JSON.stringify(req.body)));
 
   // db update
-
-  summonerDAO.findOne({ upperCaseName: upperCaseName })
+  summonerDAO.findOne({ id: req.body.summonerId })
   .then((summoner) => {
-  
-  })
-  .catch(error)
 
-
-  summonerModel.findOne({ id: req.body.summonerId }, (err, dbSummoner) => {
-    console.log(`find result2`.cyan, dbSummoner, !!dbSummoner, dbSummoner.accountId);
-
-    riotAPI.getSummonerByEncryptedAccountId(dbSummoner.accountId)
+    riotAPI.getSummonerByEncryptedAccountId(summoner.accountId)
     .then((riotSummoner) => {
 
       // update summoners collection
       console.log(colors.cyan(riotSummoner));
-
 
       riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
       .then((leagueEntries) => {
@@ -175,7 +165,7 @@ router.post("/ajax/renew.json/", (req, res) => {
         riotSummoner["leagueEntries"] = leagueEntries;
         riotSummoner["upperCaseName"] = riotSummoner.name.trim().toUpperCase();
 
-        summonerDAO.updateOne(dbSummoner.accountId, tt)
+        summonerDAO.updateOne(summoner.accountId, riotSummoner)
         .then((result) => {
           // dummy result, will be html tag result!!!
           res.json({result: 1, detail: result});
@@ -197,7 +187,11 @@ router.post("/ajax/renew.json/", (req, res) => {
         console.log(colors.red(err));
       }
     });
-
+  })
+  .catch((err) => {
+    if(err) {
+      console.log(colors.red(err));
+    }
   });
 
 });
