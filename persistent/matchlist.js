@@ -5,7 +5,7 @@ exports.findOne = (query) => {
   return new Promise((resolve, reject) => {
     matchlistModel.findOne(query, (err, matchlist) => {
       if(err) {
-        console.log(color.red(err));
+        console.log(colors.red(err));
         reject(err);
       }
       resolve(matchlist);
@@ -24,7 +24,7 @@ exports.save = (riotMatchlist) => {
 
     matchlist.save((err, matchlist) => {
       if(err) {
-        console.log(color.red(err));
+        console.log(colors.red(err));
         reject(err);
       }
       resolve(matchlist);
@@ -37,7 +37,7 @@ exports.updateOne = (accountId, newMatchlist) => {
   return new Promise((resolve, reject) => {
     matchlistModel.updateOne({accountId: accountId}, newMatchlist, (err, result) => {
       if(err) {
-        console.log(color.red(err));
+        console.log(colors.red(err));
         reject(err);
       } else {
         resolve(result);

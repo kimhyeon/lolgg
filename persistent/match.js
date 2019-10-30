@@ -5,7 +5,7 @@ exports.findOne = (query) => {
   return new Promise((resolve, reject) => {
     matchModel.findOne(query, (err, match) => {
       if(err) {
-        console.log(color.red(err));
+        console.log(colors.red(err));
         reject(err);
       } else {
         resolve(match);
@@ -21,7 +21,7 @@ exports.save = (riotMatch) => {
 
     newMatch.save((err, match) => {
       if(err) {
-        console.log(color.red(err));
+        console.log(colors.red(err));
         reject(err);
       }
       resolve(match);

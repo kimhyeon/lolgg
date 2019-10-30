@@ -3,121 +3,56 @@ const riotAPI = require('../server/riotAPI');
 const summonerDAO = require('../persistent/summoner');
 const matchListDAO = require('../persistent/matchlist');
 
-exports.getSummoner = (userName) => {
+exports.getSummoner = (upperCaseName) => {
 
-  return new Promise((reesolve, reject) => {
+  return new Promise((resolve, reject) => {
 
     summonerDAO.findOne({ upperCaseName: upperCaseName })
     .then((summoner) => {
-      console.log(`find result`.cyan, summoner, !!summoner);  
-  
-      if(summoner) {
-  
-        matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
-          console.log("matchlist".red, !!matchlist, matchlist);
-  
-          if(matchlist.length) {
-            let gameId = matchlist[0].matches[0].gameId;
-            console.log("YES", gameId);
-            console.log(colors.green(gameId));
-  
-            // riotAPI.getMatchByMatchId()
-  
-            let resData = summonerService.getSummonerResponse(summoner);
-            res.render("summoner/result", resData);
-          } else {
-            console.log("NO", summoner.accountId, new Date().getTime());
-  
-            riotAPI.getMatchlistsByAccount(summoner.accountId)
-            .then((resolveData) => {
-              console.log("[result]".yellow, Object.keys(resolveData));
-              console.log(resolveData.totalGames);
-  
-              let matchlist = new matchlistModel({
-                accountId: summoner.accountId,
-                matches: resolveData.matches,
-                totalGames: resolveData.totalGames,
-                startIndex: resolveData.startIndex,
-                endIndex: resolveData.endIndex
-              });
-  
-              //TypeError: matchlistModel.save is not a function!!
-              matchlist.save((err, matchlist) => {
-                if(err) return console.error(err);
-                console.log(matchlist);
-              });
-  
-              let resData = summonerService.getSummonerResponse(summoner);
-              res.render("summoner/result", resData);
-  
-            })
-            .catch((err) => {
-              if(err) {
-                console.log(colors.red("ERROR"), Date.now());
-              }
-            });
-  
-            // let resData = summonerService.getSummonerResponse(summoner);
-            // res.render("summoner/result", resData);
-  
-          }
-          
-        });
-  
-      } else {
-        // save summoners
-        // save summonser-scores
-        riotAPI.getSummonerByName(name)
-        .then((riotSummoner) => {
-          riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
-  
-          .then((leagueEntries) => {
-           
-            summonerDAO.save(riotSummoner, leagueEntries)
-            .then((summoner, ) => {
-              let resData = summonerService.getSummonerResponse(summoner);
-              res.render("summoner/result", resData);
-            })
-            .catch((err) => {
-              
-            })
-  
-          })
-          .catch((err) => {
-            if(err) {
-              console.log(colors.red(err));
-            }
-          });
-  
-        })
-        .catch((err) => {
-          if(err) {
-            // err error pages!!!
-            // console.log(colors.red(err));
-  
-            let resData = {
-              searchForm: true,
-              responseString: JSON.stringify(err.body)
-            }
-  
-            res.render("summoner/noSummoner", resData)
-          }
-        });
-  
-      }
+      resolve(summoner);  
     })
     .catch((err) => {
-      // summoner find error
-  
+      reject(err);
     });
-    
   });
 
 }
 
-exports.getMatchs = (accountId, matches) => {
-  
+exports.saveRiotSummoner = (name) => {
+  // save summonser-scores
   return new Promise((resolve, reject) => {
+    riotAPI.getSummonerByName(name)
+    .then((riotSummoner) => {
+      
+      riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
+      .then((leagueEntries) => {          
+        
+        summonerDAO.save(riotSummoner, leagueEntries)
+        .then((summoner) => {        
+          console.log(colors.green("summoner SAVE-OK"));
+          resolve(summoner);
+        })
+        .catch((err) => {
+          reject(err);
+        })
+
+      })
+      .catch((err) => {
+        reject(err);
+      });
+
+    })
+    .catch((err) => {
+      // { status:
+      //   { 
+      //     message: 'Data not found - summoner not found',
+      //     status_code: 404 
+      //   } 
+      // }
+      err["title"] = "noSummoner";
+      reject(err);
+
+    });
 
   });
 

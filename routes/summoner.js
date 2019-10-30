@@ -1,4 +1,3 @@
-// /summoner
 const express = require('express');
 const router = express.Router();
 
@@ -6,7 +5,9 @@ const colors = require('colors');
 
 const common = require('../server/common');
 const riotAPI = require('../server/riotAPI');
+
 const summonerService = require('../service/summoner');
+const matchlistService = require('../service/matchlist')
 
 const matchlistModel = require('../model/Matchlist');
 
@@ -39,109 +40,146 @@ router.get('/userName=:name', (req, res) => {
 
   console.log("upperCaseName", upperCaseName);
   
-  summonerDAO.findOne({ upperCaseName: upperCaseName })
+  summonerService.getSummoner(upperCaseName)
   .then((summoner) => {
-    console.log(`find result`.cyan, summoner, !!summoner);  
+    console.log(`find result`.cyan, summoner, !!summoner);
 
     if(summoner) {
-
-      matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
-        console.log("matchlist".red, !!matchlist, matchlist);
-
-        if(matchlist.length) {
-          let gameId = matchlist[0].matches[0].gameId;
-          console.log("YES", gameId);
-          console.log(colors.green(gameId));
-
-          // riotAPI.getMatchByMatchId()
-
-          let resData = summonerService.getSummonerResponse(summoner);
-          res.render("summoner/result", resData);
-        } else {
-          console.log("NO", summoner.accountId, new Date().getTime());
-
-          riotAPI.getMatchlistsByAccount(summoner.accountId)
-          .then((resolveData) => {
-            console.log("[result]".yellow, Object.keys(resolveData));
-            console.log(resolveData.totalGames);
-
-            let matchlist = new matchlistModel({
-              accountId: summoner.accountId,
-              matches: resolveData.matches,
-              totalGames: resolveData.totalGames,
-              startIndex: resolveData.startIndex,
-              endIndex: resolveData.endIndex
-            });
-
-            //TypeError: matchlistModel.save is not a function!!
-            matchlist.save((err, matchlist) => {
-              if(err) return console.error(err);
-              console.log(matchlist);
-            });
-
-            let resData = summonerService.getSummonerResponse(summoner);
-            res.render("summoner/result", resData);
-
-          })
-          .catch((err) => {
-            if(err) {
-              console.log(colors.red("ERROR"), Date.now());
-            }
-          });
-
-          // let resData = summonerService.getSummonerResponse(summoner);
-          // res.render("summoner/result", resData);
-
-        }
-        
-      });
-
+      let resData = summonerService.getSummonerResponse(summoner);
+      res.render("summoner/result", resData);
     } else {
-      // save summoners
-      // save summonser-scores
-      riotAPI.getSummonerByName(name)
-      .then((riotSummoner) => {
-        riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
 
-        .then((leagueEntries) => {
-         
-          summonerDAO.save(riotSummoner, leagueEntries)
-          .then((summoner, ) => {
-            let resData = summonerService.getSummonerResponse(summoner);
-            res.render("summoner/result", resData);
-          })
-          .catch((err) => {
-            
-          })
+      summonerService.saveRiotSummoner(upperCaseName)
+      .then((summoner) => {
 
-        })
-        .catch((err) => {
-          if(err) {
-            console.log(colors.red(err));
-          }
-        });
-
+        // matchlistService.saveRiotMatchlist(summoner.accountId)
+        // .then((matchlist) => {
+          
+          
+        // })
+        // .catch((err) => {
+          
+        // });
+        
+        let resData = summonerService.getSummonerResponse(summoner);
+        res.render("summoner/result", resData);
+      
       })
       .catch((err) => {
-        if(err) {
-          // err error pages!!!
-          // console.log(colors.red(err));
 
+        if(err.title === "noSummoner") {
           let resData = {
             searchForm: true,
-            responseString: JSON.stringify(err.body)
+            responseString: "MAKE 404 PAGE : "+JSON.stringify(err.body)
           }
-
+          res.render("summoner/noSummoner", resData)
+        } else {
+          console.log(colors.bgRed("REJECT"), colors.red(err));
+          let resData = {
+            searchForm: true,
+            responseString: "$$$$$"+JSON.stringify(err.body)
+          }
           res.render("summoner/noSummoner", resData)
         }
-      });
 
+      });
+    
     }
+
   })
   .catch((err) => {
-    // summoner find error
 
   });
+
+  // summonerDAO.findOne({ upperCaseName: upperCaseName })
+  // .then((summoner) => {
+  //   console.log(`find result`.cyan, summoner, !!summoner);  
+
+  //   if(summoner) {
+
+  //     matchlistModel.find({accountId: summoner.accountId} , (err, matchlist) => {
+  //       console.log("matchlist".red, !!matchlist, matchlist);
+
+  //       if(matchlist.length) {
+  //         let gameId = matchlist[0].matches[0].gameId;
+  //         console.log("YES", gameId);
+  //         console.log(colors.green(gameId));
+
+  //         // riotAPI.getMatchByMatchId()
+
+  //         let resData = summonerService.getSummonerResponse(summoner);
+  //         res.render("summoner/result", resData);
+  //       } else {
+  //         console.log("NO", summoner.accountId, new Date().getTime());
+
+  //         riotAPI.getMatchlistsByAccount(summoner.accountId)
+  //         .then((resolveData) => {
+  //           console.log("[result]".yellow, Object.keys(resolveData));
+  //           console.log(resolveData.totalGames);
+
+  //           let matchlist = new matchlistModel({
+  //             accountId: summoner.accountId,
+  //             matches: resolveData.matches,
+  //             totalGames: resolveData.totalGames,
+  //             startIndex: resolveData.startIndex,
+  //             endIndex: resolveData.endIndex
+  //           });
+
+  //           //TypeError: matchlistModel.save is not a function!!
+  //           matchlist.save((err, matchlist) => {
+  //             if(err) return console.error(err);
+  //             console.log(matchlist);
+  //           });
+
+  //           let resData = summonerService.getSummonerResponse(summoner);
+  //           res.render("summoner/result", resData);
+
+  //         })
+  //         .catch((err) => {
+  //           if(err) {
+  //             console.log(colors.red("ERROR"), Date.now());
+  //           }
+  //         });
+
+  //         // let resData = summonerService.getSummonerResponse(summoner);
+  //         // res.render("summoner/result", resData);
+
+  //       }
+        
+  //     });
+
+  //   } else {
+            
+  //     summonerService.saveSummoner(upperCaseName)
+  //     .then((summoner) => {
+  //       let resData = summonerService.getSummonerResponse(summoner);
+  //       res.render("summoner/result", resData);
+  //     })
+  //     .catch((err) => {
+
+  //       if(err.title === "noSummoner") {
+  //         let resData = {
+  //           searchForm: true,
+  //           responseString: "MAKE 404 PAGE : "+JSON.stringify(err.body)
+  //         }
+  //         res.render("summoner/noSummoner", resData)
+  //       } else {
+  //         console.log(colors.bgRed("REJECT"), colors.red(err));
+  //         let resData = {
+  //           searchForm: true,
+  //           responseString: "$$$$$"+JSON.stringify(err.body)
+  //         }
+  //         res.render("summoner/noSummoner", resData)
+  //       }
+
+  //     });
+
+  //   }
+  // })
+  // .catch((err) => {
+  //   // summoner find error
+
+  // });
 
 });
 
