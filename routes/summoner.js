@@ -44,26 +44,29 @@ router.get('/userName=:name', (req, res) => {
     console.log(`find result`.cyan, summoner, !!summoner);
 
     if(summoner) {
-      let resData = summonerService.getSummonerResponse(summoner);
-      res.render("summoner/result", resData);
+      // let resData = summonerService.getSummonerResponse(summoner);
+      // res.render("summoner/result", resData);
       
       // data 내려주기 matches!!!
       matchlistService.getMatchlist(summoner.accountId)
       .then((matchlist) => {
         console.log(Array.isArray(matchlist), matchlist.length);
 
-        let matches = matchlist.matches;
-        console.log(Array.isArray(matches), matches.length);
+        // async IFFE function!! 
+        (async () => {
+          try {
+            let matches = matchlist.matches,
+            matchesHTMLText = await matchService.getMatch(summoner.accountId, matches.slice(0, 6));
+            console.log(Array.isArray(matches), matches.length);
+  
+            let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
+            res.render("summoner/result", resData);
+          } catch(err) {
+            console.log(colors.red(err));
+          }
 
-        matchService.getMatchesHTMLText(matches.slice(0, 6))
-        .then((matchHtml) => {
-          //console.log(colors.green(matchHtml.length));
-          let resData = summonerService.getSummonerResponse(summoner);
-          res.render("summoner/result", resData);
-        })
-        .catch((err) => {
+        })();      
 
-        });
       })
       .catch((err) => {
         console.log(colors.bgRed(err));
@@ -71,6 +74,7 @@ router.get('/userName=:name', (req, res) => {
 
     } else {
       // save new summoner data
+
       summonerService.saveRiotSummoner(upperCaseName)
       .then((summoner) => {
         matchlistService.saveRiotMatchlist(summoner.accountId)
@@ -101,6 +105,7 @@ router.get('/userName=:name', (req, res) => {
         }
 
       });
+
     
     }
 

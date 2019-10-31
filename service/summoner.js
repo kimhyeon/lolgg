@@ -18,9 +18,10 @@ exports.getSummoner = (upperCaseName) => {
 
 }
 
-exports.saveRiotSummoner = (name) => {
+exports.saveRiotSummoner = async (name) => {
   // save summonser-scores
   return new Promise((resolve, reject) => {
+  
     riotAPI.getSummonerByName(name)
     .then((riotSummoner) => {
       
@@ -43,22 +44,15 @@ exports.saveRiotSummoner = (name) => {
 
     })
     .catch((err) => {
-      // { status:
-      //   { 
-      //     message: 'Data not found - summoner not found',
-      //     status_code: 404 
-      //   } 
-      // }
       err["title"] = "noSummoner";
       reject(err);
-
     });
 
   });
 
 }
 
-let = getSummonerResponse = (summoner) => {
+let = getSummonerResponse = (summoner, matchHtml) => {
   let romanKey = {
     "I": 1,
     "II": 2,
@@ -73,6 +67,7 @@ let = getSummonerResponse = (summoner) => {
     border: null,
     RANKED_SOLO: null,
     RANKED_FLEX: null,
+    test: matchHtml
   }   
 
   summoner.leagueEntries.forEach((el) => {
@@ -98,6 +93,8 @@ let = getSummonerResponse = (summoner) => {
 
     } 
   });
+
+
 
   console.log(colors.yellow(resData));
 
