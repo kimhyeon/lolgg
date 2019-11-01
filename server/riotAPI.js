@@ -33,6 +33,16 @@ apiRequest = (sendURL, resolve, reject) => {
 
 };
 
+exports.getVersions = () => {
+  let sendURL = "https://ddragon.leagueoflegends.com/api/versions.json";
+  console.log(colors.blue("getVersions()"));
+
+  return new Promise((resolve, reject) => {
+    apiRequest(sendURL, resolve, reject);
+  });
+
+}
+
 exports.getSummonerByName = (name) => {
     let url = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/",
         sendURL = `${url}${encodeURI(name)}?api_key=${API_KEY}`;
@@ -64,7 +74,6 @@ exports.getLeagueEntriesBySummonerId = (summonerId) => {
     return new Promise((resolve, reject) => {
       apiRequest(sendURL, resolve, reject);
     });
-
 
   }
 
