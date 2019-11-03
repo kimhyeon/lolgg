@@ -96,5 +96,44 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .average-stats .match__graph{display:inline-block;width:90px;height:87px;padding:0 0 24px 24px;vertical-align:top;}
 .average-stats .match__graph > div{background: #FAFAFA;width:90px;height:90px;}
 .average-stats .match__KDA{display:inline-block;width:155px;text-align:center;padding-top:18px;font-size:12px;}
-.average-stats .match__KDA .KDARatio{font-size:16px;margin-top:7px;line-height: 19px;
-}
+.average-stats .match__KDA .KDARatio{font-size:16px;margin-top:7px;line-height: 19px;}
+
+.gameItemList{margin-top:8px}
+.gameItemList .gameItem.win{margin-bottom:8px;position:relative;background-color: #a3cfec;border:1px solid #99b9cf;}
+.gameItemList .gameItem.lose{margin-bottom:8px;position:relative;background-color: #e2b6b3;border:1px solid #cea7a7;}
+.gameItem > div{display:table-cell;vertical-align:middle;height:96px;}
+.gameItem .gameStats{width:70px;text-align:center;font-size:11px;color:#555;line-height:16px;}
+.gameItem .gameStats .bar{display:block;width:27px;margin:5px auto;height:2px;background-color:#cdd2d2;}
+.gameItem.win .gameStats .bar{background-color:#99b9cf;}
+.gameItem.lose .gameStats .bar{background-color:#cea7a7;}
+.gameItem .gameStats .gameResult{font-weight:bold;}
+.gameItem.win .gameStats .gameResult{color:#1a78ae;}
+.gameItem.lose .gameStats .gameResult{color:#c6443e;}
+.gameItem .gameSettingInfo{width:100px;text-align:center;}
+.gameItem .gameSettingInfo .championImage{display:inline-block;width:46px;height:46px;vertical-align:middle;border-radius:50%;overflow:hidden;}
+.gameItem .gameSettingInfo .championImage > a{text-decoration:none;color:inherit;}
+.gameItem .gameSettingInfo .championImage .image{display:block;width:100%;height:100%;background-color:#000;}
+.gameItem .gameSettingInfo .championName{margin-top:8px;font-size:11px;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gameItem .gameSettingInfo .championName > a{text-decoration:none;color:inherit;}
+.gameItem .score{font-size:11px;text-align:center;}
+.gameItem .score .KDA{font-size:15px;color:#879292;white-space:nowrap;}
+.gameItem .score .KDA .kills, .gameItem .score .KDA .assists{color:#555e5e;font-weight:bold;}
+.gameItem .score .KDA .deaths{color:#c6443e;font-weight:bold;}
+.gameItem .score .KDARatio{color:#555e5e;font-weight:bold;font-size:12px;margin-top:6px;}
+.gameItem .score .KDARatio .KDARatio{color:#353a3a;}
+.gameItem .stats{width:90px;font-size:11px;text-align:center;line-height:18px;color:#555e5e;}
+.gameItem .stats .killRate{color:#c6443e;}
+.gameItem .items{font-size:0;}
+.gameItem .items .itemList{width:96px;margin:0 auto;}
+.gameItem .items .itemList .item{display:inline-block;width:22px;height:22px;border-radius:3px;margin-top:2px;margin-right:2px;overflow:hidden;}
+.gameItem.win .items .itemList .item{background-color:#99b9cf;}
+.gameItem .items .itemList .item .image{width:100%; height:100%;}
+.gameItem .items .pickWard{margin-top:7px;color:#353a3a;line-height:13px;font-size:11px;text-align:center;}
+.gameItem .items .pickWard img{vertical-align:middle;}
+.gameItem .players{width:170px;font-size:0;}
+.gameItem .players .team{display:inline-block;width:50%;}
+.gameItem .players .team .summoner{display:block;width:80px;height:18px;margin-left:3px;text-align:left;white-space:nowrap;}
+.gameItem .players .team .summoner .championImage{display:inline-block;vertical-align:middle;margin-right:3px;}
+.gameItem .players .team .summoner .championImage img{width:16px;height:16px;}
+.gameItem .players .team .summoner .summonerName{display:inline-block;max-width:60px;vertical-align:middle;font-size:11px;color:#555;}
+.gameItem .players .team .summoner .summonerName a{display:block;color:inherit;text-decoration:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}

@@ -6,11 +6,13 @@ const colors = require('colors');
 const common = require('../server/common');
 const riotAPI = require('../server/riotAPI');
 
-const summonerService = require('../service/summoner');
-const matchlistService = require('../service/matchlist')
-const matchService = require('../service/match')
+const staticService = require('../service/static')
 
-const summonerDAO = require('../persistent/summoner')
+const summonerService = require('../service/summoner');
+const matchlistService = require('../service/matchlist');
+const matchService = require('../service/match');
+
+const summonerDAO = require('../persistent/summoner');
 
 router.get(['/', '/userName', '/userName='], (req, res) => {
   // summoner page
@@ -43,71 +45,92 @@ router.get('/userName=:name', (req, res) => {
   .then((summoner) => {
     console.log(`find result`.cyan, summoner, !!summoner);
 
-    if(summoner) {
-      // let resData = summonerService.getSummonerResponse(summoner);
-      // res.render("summoner/result", resData);
-      
-      // data 내려주기 matches!!!
-      matchlistService.getMatchlist(summoner.accountId)
-      .then((matchlist) => {
-        console.log(Array.isArray(matchlist), matchlist.length);
+    (async () => { 
 
-        // async IFFE function!! 
-        (async () => {
-          try {
-            let matches = matchlist.matches,
-            matchesHTMLText = await matchService.getMatch(summoner.accountId, matches.slice(0, 6));
-            console.log(Array.isArray(matches), matches.length);
-  
-            let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
-            res.render("summoner/result", resData);
-          } catch(err) {
-            console.log(colors.red(err));
-          }
-
-        })();      
-
-      })
-      .catch((err) => {
-        console.log(colors.bgRed(err));
-      });
-
-    } else {
-      // save new summoner data
-
-      summonerService.saveRiotSummoner(upperCaseName)
-      .then((summoner) => {
-        matchlistService.saveRiotMatchlist(summoner.accountId)
+      if(summoner) {
+            
+        // data 내려주기 matches!!!
+        matchlistService.getMatchlist(summoner.accountId)
         .then((matchlist) => {
-          console.log(colors.bgCyan(!!matchlist, matchlist.length));
-          let resData = summonerService.getSummonerResponse(summoner);
-          res.render("summoner/result", resData);
+          console.log(Array.isArray(matchlist), matchlist.length);
+
+          (async () => {
+            try {
+
+              let version = await staticService.checkVersion();
+
+              let matches = matchlist.matches,
+              matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches.slice(0, 6));
+              
+              let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
+              
+              res.render("summoner/result", resData);
+            } catch(err) {
+              console.log(colors.red(err));
+            }
+
+          })();      
+
         })
         .catch((err) => {
-          console.log(colors.red(err));
+          console.log(colors.bgRed(err));
         });
-      })
-      .catch((err) => {
 
-        if(err.title === "noSummoner") {
-          let resData = {
-            searchForm: true,
-            responseString: "MAKE 404 PAGE : "+JSON.stringify(err.body)
+      } else {
+        // save new summoner data
+
+        summonerService.saveRiotSummoner(upperCaseName)
+        .then((summoner) => {
+          matchlistService.saveRiotMatchlist(summoner.accountId)
+          .then((matchlist) => {
+
+            console.log(Array.isArray(matchlist), matchlist.length);
+
+            (async () => {
+              try {
+  
+                let version = await staticService.checkVersion();
+  
+                let matches = matchlist.matches,
+                matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches.slice(0, 6));
+                
+                let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
+                
+                res.render("summoner/result", resData);
+              } catch(err) {
+                console.log(colors.red(err));
+              }
+  
+            })();    
+
+          })
+          .catch((err) => {
+            console.log(colors.red(err));
+          });
+        })
+        .catch((err) => {
+
+          if(err.title === "noSummoner") {
+            let resData = {
+              searchForm: true,
+              responseString: "MAKE 404 PAGE : "+JSON.stringify(err.body)
+            }
+            res.render("summoner/noSummoner", resData)
+          } else {
+            console.log(colors.bgRed("REJECT"), colors.red(err));
+            let resData = {
+              searchForm: true,
+              responseString: "$$need to make 404 summoner page$$"+JSON.stringify(err.body)
+            }
+            res.render("summoner/noSummoner", resData)
           }
-          res.render("summoner/noSummoner", resData)
-        } else {
-          console.log(colors.bgRed("REJECT"), colors.red(err));
-          let resData = {
-            searchForm: true,
-            responseString: "$$need to make 404 summoner page$$"+JSON.stringify(err.body)
-          }
-          res.render("summoner/noSummoner", resData)
-        }
 
-      });
+        });
 
-    
-    }
+      
+      }
+
+    })();
 
   })
   .catch((err) => {

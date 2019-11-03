@@ -14,8 +14,9 @@ apiRequest = (sendURL, resolve, reject) => {
       maxRedirects: 10 
   }, (error, response, body) => { 
 
-    if(response.statusCode === 200) {
-      console.log(colors.green(JSON.parse(body)));
+    if(response.statusCode === 200 || response.statusCode === 304) {
+      console.log(colors.green("OK"));
+      // console.log(colors.green(JSON.parse(body)));
     } else {
       console.log(colors.bgRed.white("REJECT!!!"));
       console.log(colors.red(JSON.parse(body)));    
@@ -32,16 +33,6 @@ apiRequest = (sendURL, resolve, reject) => {
   });
 
 };
-
-exports.getVersions = () => {
-  let sendURL = "https://ddragon.leagueoflegends.com/api/versions.json";
-  console.log(colors.blue("getVersions()"));
-
-  return new Promise((resolve, reject) => {
-    apiRequest(sendURL, resolve, reject);
-  });
-
-}
 
 exports.getSummonerByName = (name) => {
     let url = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/",
@@ -104,4 +95,24 @@ exports.getMatchByMatchId = (matchId) => {
     apiRequest(sendURL, resolve, reject);
   });
   
+}
+
+exports.getVersions = () => {
+  let sendURL = "https://ddragon.leagueoflegends.com/api/versions.json";
+  console.log(colors.blue("getVersions()"));
+
+  return new Promise((resolve, reject) => {
+    apiRequest(sendURL, resolve, reject);
+  });
+
+}
+
+exports.getChampions = (currentVersion) => {
+  let sendURL = `http://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/ko_KR/champion.json`;
+  console.log(colors.blue("getChampions()"));
+
+  return new Promise((resolve, reject) => {
+    apiRequest(sendURL, resolve, reject);
+  });
+
 }

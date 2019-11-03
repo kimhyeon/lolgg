@@ -7,7 +7,6 @@ exports.getMatchlist = (accountId) => {
   
     matchListDAO.findOne({accountId: accountId})
     .then((matchlist) => {
-      console.log(colors.magenta(matchlist));
       resolve(matchlist);
     })
     .catch((err) => {

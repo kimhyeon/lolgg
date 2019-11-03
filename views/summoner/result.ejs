@@ -153,6 +153,9 @@
                 </div>
               </div>
               <!-- //average-stats end -->
+
+              <%- matchItemList %>
+              
             </div>
           </div>
         
@@ -163,7 +166,6 @@
 
     <%= summonerString %>
     <hr>
-    <%= JSON.stringify(test) %>
 
   </div>
 
@@ -188,6 +190,7 @@ button.addEventListener("click", (e) =>{
     console.error(err);
   });
 });
+
 </script>
 
 </html>

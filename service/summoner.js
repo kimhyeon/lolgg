@@ -60,14 +60,14 @@ let = getSummonerResponse = (summoner, matchHtml) => {
     "IV": 4
   };
 
-  let resData = {
+let resData = {
     searchForm: true,
     summoner: summoner,
     summonerString: summoner,
     border: null,
     RANKED_SOLO: null,
     RANKED_FLEX: null,
-    test: matchHtml
+    matchItemList: matchHtml
   }   
 
   summoner.leagueEntries.forEach((el) => {
