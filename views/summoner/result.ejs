@@ -156,6 +156,43 @@
 
               <%- matchItemList %>
               
+              <div id="matchMoreButton" class="matchMoreButton box" data-account-id="<%= summoner.accountId %>">
+                <a href="javascript:void(0)" class="button">더 보기</a>
+              </div>
+              <script>
+                (() => {
+                  document.getElementById("matchMoreButton").addEventListener("click", (e) => {
+                    let button = e.target.closest("div"),
+                      accountId = button.dataset.accountId;
+                      lastGameId = button.previousElementSibling.dataset.lastGameid;
+                    console.log(accountId, lastGameId);
+             
+                    let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}`;
+                    fetch(url, {
+                      method: 'get',
+                      headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                      },
+                    })
+                    .then((res) => {
+                      return res.json();
+                      
+                    })
+                    .then((json) => {
+                      button.insertAdjacentHTML("beforebegin", json.html);
+                      // console.log(JSON.stringify(json));
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                    });
+
+
+                  });
+
+                })();
+              </script>
+
             </div>
           </div>
         

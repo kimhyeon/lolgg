@@ -2,12 +2,43 @@ const colors = require('colors');
 const riotAPI = require('../server/riotAPI');
 const matchListDAO = require('../persistent/matchlist');
 
-exports.getMatchlist = (accountId) => {
+exports.getMatchlist = (accountId, startInfo) => {
+  const LIMIT = 10;
   return new Promise((resolve, reject) => {
   
     matchListDAO.findOne({accountId: accountId})
     .then((matchlist) => {
-      resolve(matchlist);
+
+      if(startInfo) {
+
+        // let index = matchlist.matches.findIndex((match) => {
+        //   return match.gameId === startInfo; 
+        // });
+
+        console.log(colors.magenta(Array.isArray(matchlist.matches)), startInfo);
+
+        let index = null;
+        for(let i in matchlist.matches) {
+          console.log(matchlist.matches[i].gameId, startInfo, matchlist.matches[i].gameId === parseInt(startInfo), i);
+          if(matchlist.matches[i].gameId === parseInt(startInfo)) {
+            index = parseInt(i);
+            // break;
+          }
+        }        
+        
+        if(index) {
+          matchlist.matches = matchlist.matches.slice(index + 1, index + 1 + LIMIT); 
+          console.log(colors.magenta(index + 1, index + 1 + LIMIT, matchlist.matches.length));
+          resolve(matchlist)
+        } else {
+          console.log(colors.magenta("Save more matches of mathchlist!!!!!!"));
+        }
+
+      } else {
+        matchlist.matches = matchlist.matches.slice(0, LIMIT); 
+        resolve(matchlist);
+      }
+
     })
     .catch((err) => {
       reject(err);

@@ -137,3 +137,5 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItem .players .team .summoner .championImage img{width:16px;height:16px;}
 .gameItem .players .team .summoner .summonerName{display:inline-block;max-width:60px;vertical-align:middle;font-size:11px;color:#555;}
 .gameItem .players .team .summoner .summonerName a{display:block;color:inherit;text-decoration:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}
+
+.matchMoreButton a.button{display:block;height:50px;color:#555e5e;font-size:13px;line-height:50px;text-align:center;text-decoration:none;outline:none;}

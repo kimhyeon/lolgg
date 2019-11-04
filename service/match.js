@@ -139,10 +139,10 @@ let getMatchesHTMLText = (accountId, version, matches, lolggChampion) => {
     let itemList = tag("div", {class: "itemList"}, false)
     
     let getItemTag = (item, itemUrl) => {
-      if(!!item) {
-        return tag("div", {class: "item"}, false) + tag("img", {src: itemUrl, class: "image"})+"</div>";
+      if(item != 0) {
+        return tag("div", {class: "item"}, false) + tag("img", {src: itemUrl, class: "image"}) + "</div>";
       } else {
-        return tag("div", {class: "item"}, false) + tag("div", {class: "image noitem"})+"</div>";
+        return tag("div", {class: "item"}, false) + tag("div", {class: "image noitem"}) + "</div>";
       }
     }
 
@@ -220,7 +220,8 @@ let getMatchesHTMLText = (accountId, version, matches, lolggChampion) => {
 
   }
 
-  let gameItemList = tag("div", {class: "gameItemList"}, false);
+  let lastGameId = gamesData[gamesData.length - 1].gameId, 
+    gameItemList = tag("div", {"class": "gameItemList", "data-last-gameid": String(lastGameId)}, false);
   
   gamesData.forEach((game) => {
     gameItemList += gameItemHTMLText(game);
@@ -334,6 +335,7 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     });
 
     obj["summonerName"] = participantIdentity.player.summonerName;
+    obj["gameId"] = match.gameId;
 
     obj["queueName"] = queueName[match.queueId];
     obj["gameCreation"] = getDaysAgoText(match.gameCreation);
@@ -358,7 +360,7 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["totalMinionsKilled"] = participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled + " CS";
     obj["killRate"] = getKillRate(participant, teamParticipant) + "%";
 
-    obj["item0"] = getItemImgUrl(participant.stats.item0);
+    obj["item0"] = participant.stats.item0;
     obj["item0_imgUrl"] = getItemImgUrl(participant.stats.item0);
     obj["item1"] = participant.stats.item1;
     obj["item1_imgUrl"] = getItemImgUrl(participant.stats.item1);

@@ -52,7 +52,7 @@ router.get('/userName=:name', (req, res) => {
         // data 내려주기 matches!!!
         matchlistService.getMatchlist(summoner.accountId)
         .then((matchlist) => {
-          console.log(Array.isArray(matchlist), matchlist.length);
+          console.log(Array.isArray(matchlist.matches), matchlist.matches.length);
 
           (async () => {
             try {
@@ -60,7 +60,7 @@ router.get('/userName=:name', (req, res) => {
               let version = await staticService.checkVersion();
 
               let matches = matchlist.matches,
-              matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches.slice(0, 6));
+              matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches);
               
               let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
               
@@ -69,7 +69,7 @@ router.get('/userName=:name', (req, res) => {
               console.log(colors.red(err));
             }
 
-          })();      
+          })();
 
         })
         .catch((err) => {
@@ -187,6 +187,41 @@ router.post("/ajax/renew.json/", (req, res) => {
       console.log(colors.red(err));
     }
   });
+
+});
+
+
+router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId", (req, res) => {
+  let startInfo = req.params.startInfo,
+    accountId = req.params.accountId;
+
+  // nal build
+  matchlistService.getMatchlist(accountId, startInfo)
+  .then((matchlist) => {
+    console.log(Array.isArray(matchlist.matches), matchlist.matches.length);
+
+    (async () => {
+      try {
+
+        let version = await staticService.checkVersion();
+
+        let matches = matchlist.matches,
+          matchesHTMLText = await matchService.getMatch(accountId, version, matches);
+
+        res.json({result: 1, html: matchesHTMLText});
+
+      } catch(err) {
+        console.log(colors.red(err));
+      }
+
+    })();
+
+  })
+  .catch((err) => {
+    console.log(colors.bgRed(err));
+  });
+
+
 
 });
 
