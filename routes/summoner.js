@@ -57,7 +57,7 @@ router.get('/userName=:name', (req, res) => {
           (async () => {
             try {
 
-              let version = await staticService.checkVersion();
+              let version = await staticService.getVersion();
 
               let matches = matchlist.matches,
               matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches);
@@ -89,7 +89,7 @@ router.get('/userName=:name', (req, res) => {
             (async () => {
               try {
   
-                let version = await staticService.checkVersion();
+                let version = await staticService.getVersion();
   
                 let matches = matchlist.matches,
                 matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches.slice(0, 6));
