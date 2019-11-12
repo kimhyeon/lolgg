@@ -29,7 +29,7 @@ router.get(['/', '/userName', '/userName='], (req, res) => {
 
 });
 
-router.get('/userName=:name', (req, res) => { 
+router.get('/userName=:name', (req, res, next) => { 
 //router.get(/userName=*/, (req, res) => { 
   console.log("path", req.path);
   console.log("params", req.params);
@@ -41,75 +41,57 @@ router.get('/userName=:name', (req, res) => {
 
   console.log("upperCaseName", upperCaseName);
   
-  summonerService.getSummoner(upperCaseName)
-  .then((summoner) => {
-    console.log(`find result`.cyan, summoner, !!summoner);
+  try {
 
-    (async () => { 
+    (async () => {
 
-      if(summoner) {
-            
-        // data 내려주기 matches!!!
-        matchlistService.getMatchlist(summoner.accountId)
-        .then((matchlist) => {
-          console.log(Array.isArray(matchlist.matches), matchlist.matches.length);
+      let dbSummoner = await summonerService.getSummoner(upperCaseName);
+      if (dbSummoner) {
 
-          (async () => {
-            try {
+        let dbMatchList = await matchlistService.getMatchlist(dbSummoner.accountId),
+         version = await staticService.getVersion();
+        
+         if(dbMatchList) {
+          let matches = dbMatchList.matches,
+            matchesHTMLText = await matchService.getMatch(dbSummoner.accountId, version, matches);
+          
+          let resData = summonerService.getSummonerResponse(dbSummoner, matchesHTMLText);
+          res.render("summoner/result", resData);
 
-              let version = await staticService.getVersion();
+        } else {
+          // save matchlist
+          console.log(colors.cyan(`u need match list of ${dbSummoner.name}`));
+ 
+          let matchlist = await matchlistService.saveRiotMatchlist(dbSummoner.accountId);
+          let matches = matchlist.matches,
+            matchesHTMLText = await matchService.getMatch(dbSummoner.accountId, version, matches.slice(0, 20));
 
-              let matches = matchlist.matches,
-              matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches);
-              
-              let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
-              
-              res.render("summoner/result", resData);
-            } catch(err) {
-              console.log(colors.red(err));
-            }
+          let resData = summonerService.getSummonerResponse(dbSummoner, matchesHTMLText);
+          res.render("summoner/result", resData);
 
-          })();
-
-        })
-        .catch((err) => {
-          console.log(colors.bgRed(err));
-        });
-
+        }
+        
       } else {
-        // save new summoner data
 
-        summonerService.saveRiotSummoner(upperCaseName)
-        .then((summoner) => {
-          matchlistService.saveRiotMatchlist(summoner.accountId)
-          .then((matchlist) => {
+        try {
+          let summoner = await summonerService.saveRiotSummoner(upperCaseName);
 
-            console.log(Array.isArray(matchlist), matchlist.length);
-
-            (async () => {
-              try {
+          try {
+            let matchlist = matchlistService.saveRiotMatchlist(summoner.accountId),
+              version = await staticService.getVersion();
   
-                let version = await staticService.getVersion();
-  
-                let matches = matchlist.matches,
-                matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches.slice(0, 6));
+            let matches = matchlist.matches,
+              matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches.slice(0, 20));
                 
-                let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
-                
-                res.render("summoner/result", resData);
-              } catch(err) {
-                console.log(colors.red(err));
-              }
-  
-            })();    
+            let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
+            res.render("summoner/result", resData);
 
-          })
-          .catch((err) => {
+          } catch(err) {
             console.log(colors.red(err));
-          });
-        })
-        .catch((err) => {
+          }
 
+        } catch(err) {
+          console.log(colors.red(err.title), err.status);
           if(err.title === "noSummoner") {
             let resData = {
               searchForm: true,
@@ -124,18 +106,16 @@ router.get('/userName=:name', (req, res) => {
             }
             res.render("summoner/noSummoner", resData)
           }
-
-        });
-
-      
+        }
+          
       }
 
     })();
 
-  })
-  .catch((err) => {
-
-  });
+  } catch(err) {
+    console.log(colors.red(err));
+    next(err);
+  }
 
 });
 
@@ -189,7 +169,6 @@ router.post("/ajax/renew.json/", (req, res) => {
   });
 
 });
-
 
 router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId", (req, res) => {
   let startInfo = req.params.startInfo,

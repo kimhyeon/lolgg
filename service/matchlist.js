@@ -35,8 +35,12 @@ exports.getMatchlist = (accountId, startInfo) => {
         }
 
       } else {
-        matchlist.matches = matchlist.matches.slice(0, LIMIT); 
-        resolve(matchlist);
+        if(matchlist) {
+          matchlist.matches = matchlist.matches.slice(0, LIMIT); 
+          resolve(matchlist);
+        } else {
+          resolve(matchlist);
+        }
       }
 
     })

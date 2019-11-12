@@ -14,6 +14,7 @@ exports.getSummoner = (upperCaseName) => {
     .catch((err) => {
       reject(err);
     });
+    
   });
 
 }
