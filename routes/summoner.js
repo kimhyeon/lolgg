@@ -108,9 +108,6 @@ router.get('/userName=:name', (req, res, next) => {
           }
         }
           
-
-        });
-      
       }
 
     })();
