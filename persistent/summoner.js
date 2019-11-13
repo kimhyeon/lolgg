@@ -15,6 +15,13 @@ exports.findOne = (query) => {
 
 exports.save = (summoner, leagueEntries) => {
 
+  let tier = "";
+  leagueEntries.forEach((leagueEntrie) => {
+    if(leagueEntrie.queueType === "RANKED_SOLO_5x5") {
+      tier = leagueEntrie.tier.toLocaleLowerCase();
+    }
+  });
+
   let newSummoner = new summonerModel({
     profileIconId: summoner.profileIconId,
     name: summoner.name.trim(),
@@ -24,6 +31,7 @@ exports.save = (summoner, leagueEntries) => {
     id: summoner.id,
     revisionDate: summoner.revisionDate,
 
+    tier: tier,
     leagueEntries: leagueEntries,
     upperCaseName: summoner.name.trim().toUpperCase()
   });
@@ -48,6 +56,15 @@ exports.save = (summoner, leagueEntries) => {
 }
 
 exports.updateOne = (accountId, summoner) => {
+
+  let tier = "";
+  summoner.leagueEntries.forEach((leagueEntrie) => {
+    if(leagueEntrie.queueType === "RANKED_SOLO_5x5") {
+      tier = leagueEntrie.tier.toLocaleLowerCase();
+    }
+  });
+  summoner["tier"] = tier;
+
   return new Promise((resolve, reject) => {
     summonerModel.updateOne({accountId: accountId}, summoner, (err, result) => {
       if(err) {

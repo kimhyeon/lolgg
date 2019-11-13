@@ -9,6 +9,7 @@ var Summoner = new mongoose.Schema({
     id: String,
     revisionDate: Number,
 
+    tier: String,
     leagueEntries: Array,
     upperCaseName: String
 });

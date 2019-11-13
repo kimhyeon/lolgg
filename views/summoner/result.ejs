@@ -23,7 +23,7 @@
           </div>
           <div class="summoner-info__face">
             <div class="profile-icon">
-              <% if(border) { %>
+              <% if(border && border !== "") { %>
                 <img class="profile-icon__border-image" src="/images/border/<%= border %>.png"></img>
               <% } %>
 
@@ -58,56 +58,9 @@
           
           <div class="summoner-layout-summary" data-tab-data-url="" style="display: block;">
             <div class="side-content">
-              <div class="side-content__tier box">
-                <div class="emblem">
-                  <% if(RANKED_SOLO) { %>
-                    <img class="emblem-box__img" src="/images/emblems/<%= RANKED_SOLO.emblem %>.png">
-                  <% } else { %>
-                    <img class="emblem-box__img" src="/images/emblems/default.png">
-                  <% } %>
-                </div>
-                <div class="tier-rank-info">
-                  <div class="tier-rank-info__rank-type">솔로랭크</div>
 
-                  <% if(RANKED_SOLO) { %>
-                    <div class="tier-rank-info__tier-rank"><%= RANKED_SOLO.tier %></div>
-                    <div class="tier-rank-info__tier-info">
-                      <span class="lp"><%= RANKED_SOLO.leaguePoints %> LP</span> / 
-                        <%= RANKED_SOLO.wins %>승 <%= RANKED_SOLO.losses %>패
-                    </div>
-                    <div class="tier-rank-info__win-rate">승률 <%= RANKED_SOLO.winRate %>%</div>
-                  <% } else { %>
-                    <div>Unranked</div>
-                  <% } %>
-                  
-                </div>
-              </div>
-              <div class="side-content__tier box">
-                <div class="emblem emblem--sub">
+                <%- tierBoxes %>
 
-                  <% if(RANKED_FLEX) { %>
-                    <img class="emblem-box__img" src="/images/emblems/<%= RANKED_FLEX.emblem %>.png">
-                  <% } else { %>
-                    <img class="emblem-box__img" src="/images/emblems/default.png">
-                  <% } %>
-
-                </div>
-                <div class="tier-rank-info">
-                  <div class="tier-rank-info__rank-type">자유 5:5 랭크</div>
-
-                  <% if(RANKED_FLEX) { %>
-                    <div class="tier-rank-info__tier-rank"><%= RANKED_FLEX.tier %></div>
-                    <div class="tier-rank-info__tier-info">
-                      <span class="lp"><%= RANKED_FLEX.leaguePoints %> LP</span> / 
-                        <%= RANKED_FLEX.wins %>승 <%= RANKED_FLEX.losses %>패
-                    </div>
-                    <div class="tier-rank-info__win-rate">승률 <%= RANKED_FLEX.winRate %>%</div>
-                  <% } else { %>
-                    <div>Unranked</div>
-                  <% } %>
-
-                </div>
-              </div>
             </div>
             <div class="main-content">
               <!-- //navigation start -->
@@ -201,7 +154,6 @@
       </div>
     </div>
 
-    <%= summonerString %>
     <hr>
 
   </div>
@@ -221,7 +173,25 @@ button.addEventListener("click", (e) =>{
     body: JSON.stringify({summonerId: e.target.dataset.summonerId})
   })
   .then((res) => {
-    console.warn(res);
+    return res.json();
+  })
+  .then((json) => {
+    console.warn(json);
+    if(json.tierBoxes) {
+      let sideContent = document.querySelector(".side-content"),
+      oldTierBoxes = document.querySelectorAll(".side-content__tier"),
+      i;
+      
+      // remove
+      for(i = 0; i < oldTierBoxes.length; i++) {
+         let box = oldTierBoxes[i];
+         box.parentNode.removeChild(box);
+      }
+
+      // add
+      sideContent.insertAdjacentHTML("afterbegin", json.tierBoxes);
+      
+    }
   })
   .catch((err) => {
     console.error(err);

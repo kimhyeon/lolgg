@@ -5,7 +5,7 @@ const matchDAO = require('../persistent/match');
 const staticDAO = require('../persistent/static');
 
 // test sync await,
-exports.getMatch = (accountId, version, matchlist) => {
+exports.getMatchesHTMLText = (accountId, version, matchlist) => {
   return new Promise((resolve, reject) => {
 
     (async () => {
@@ -26,7 +26,7 @@ exports.getMatch = (accountId, version, matchlist) => {
         // working here !!!!
 
         console.log(colors.cyan(`${accountId} ${version} ${matches.length}`))
-        resolve(getMatchesHTMLText(accountId, version, matches, lolggChampion.data));
+        resolve(getHTMLText(accountId, version, matches, lolggChampion.data));
 
       } catch(err) {
         reject(err);
@@ -37,9 +37,9 @@ exports.getMatch = (accountId, version, matchlist) => {
 
 }
 
-let getMatchesHTMLText = (accountId, version, matches, lolggChampion) => {
+let getHTMLText = (accountId, version, matches, lolggChampion) => {
  
-  let gamesData =  getGamesData(accountId, version, matches, lolggChampion);
+  let gamesData = getGamesData(accountId, version, matches, lolggChampion);
   
   let gameItemHTMLText = (game) => {
     
@@ -229,7 +229,6 @@ let getMatchesHTMLText = (accountId, version, matches, lolggChampion) => {
   });
 
   gameItemList += "</div>";
- 
 
   // console.log(tag('a', {href: 'https://sellside.com'}, accountId));
   console.log(colors.cyan(gameItemList));
@@ -338,6 +337,26 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["gameId"] = match.gameId;
 
     obj["queueName"] = queueName[match.queueId];
+    obj["gameCreation"] = getDaysAgoText(match.gameCreation);
+    obj["win"] = participant.stats.win ? "승리" : "패배";
+    obj["gameDuration"] = getDurationText(match.gameDuration);
+
+    obj["championName"] = lolggChampion[participant.championId].name;
+    obj["championId"] = lolggChampion[participant.championId].id;
+    obj["championId_imgUrl"] = getChampionImgUrl(lolggChampion[participant.championId].id);
+    
+    obj["spell1Id"] = participant.spell1Id;
+    obj["spell2Id"] = participant.spell2Id;
+    obj["perk0"] = participant.stats.perk0;
+    obj["perkSubStyle"] = participant.stats.perkSubStyle;
+    
+    obj["kills"] = participant.stats.kills;
+    obj["deaths"] = participant.stats.deaths;
+    obj["assists"] = participant.stats.assists;
+    obj["KDARatio"] = ((obj["kills"] + obj["assists"]) / obj["deaths"]).toFixed(2) + ":1";
+      
+    obj["champLevel"] = participant.stats.champLevel;
+    obj["totalMinionsKilled"] = participant.stats.totalMinionsKilled + participant.stat
     obj["gameCreation"] = getDaysAgoText(match.gameCreation);
     obj["win"] = participant.stats.win ? "승리" : "패배";
     obj["gameDuration"] = getDurationText(match.gameDuration);

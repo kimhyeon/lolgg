@@ -53,9 +53,11 @@ router.get('/userName=:name', (req, res, next) => {
         
          if(dbMatchList) {
           let matches = dbMatchList.matches,
-            matchesHTMLText = await matchService.getMatch(dbSummoner.accountId, version, matches);
-          
-          let resData = summonerService.getSummonerResponse(dbSummoner, matchesHTMLText);
+            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches),
+            tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
+            
+          let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
+       
           res.render("summoner/result", resData);
 
         } else {
@@ -64,9 +66,10 @@ router.get('/userName=:name', (req, res, next) => {
  
           let matchlist = await matchlistService.saveRiotMatchlist(dbSummoner.accountId);
           let matches = matchlist.matches,
-            matchesHTMLText = await matchService.getMatch(dbSummoner.accountId, version, matches.slice(0, 20));
+            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches.slice(0, 20)),
+            tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
 
-          let resData = summonerService.getSummonerResponse(dbSummoner, matchesHTMLText);
+          let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
           res.render("summoner/result", resData);
 
         }
@@ -77,13 +80,14 @@ router.get('/userName=:name', (req, res, next) => {
           let summoner = await summonerService.saveRiotSummoner(upperCaseName);
 
           try {
-            let matchlist = matchlistService.saveRiotMatchlist(summoner.accountId),
+            let matchlist = await matchlistService.saveRiotMatchlist(summoner.accountId),
               version = await staticService.getVersion();
   
             let matches = matchlist.matches,
-              matchesHTMLText = await matchService.getMatch(summoner.accountId, version, matches.slice(0, 20));
-                
-            let resData = summonerService.getSummonerResponse(summoner, matchesHTMLText);
+              matchesHTMLText = await matchService.getMatchesHTMLText(summoner.accountId, version, matches.slice(0, 20)),
+              tierBoxes = await summonerService.getTierBoxesHTMLText(summoner);
+
+            let resData = summonerService.getSummonerResponse(summoner, tierBoxes, matchesHTMLText);
             res.render("summoner/result", resData);
 
           } catch(err) {
@@ -133,14 +137,18 @@ router.post("/ajax/renew.json/", (req, res) => {
 
           let riotLeagueEntries = await riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id);
           if(riotLeagueEntries) {
+
             riotSummoner["leagueEntries"] = riotLeagueEntries;
             riotSummoner["upperCaseName"] = riotSummoner.name.trim().toUpperCase();
+            // more ...????
+
           }
 
           summonerDAO.updateOne(dbSummoner.accountId, riotSummoner)
           .then((result) => {
             // dummy result, will be html tag result!!!
-            res.json({result: 1, detail: result});
+            let tierBoxes = summonerService.getTierBoxesHTMLText(riotSummoner)
+            res.json({result: 1, detail: result, tierBoxes: tierBoxes});
           })
           .catch((err) => {
             res.json({result: -1, detail: err});
@@ -177,7 +185,7 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId"
         let version = await staticService.checkVersion();
 
         let matches = matchlist.matches,
-          matchesHTMLText = await matchService.getMatch(accountId, version, matches);
+          matchesHTMLText = await matchService.getMatchesHTMLText(accountId, version, matches);
 
         res.json({result: 1, html: matchesHTMLText});
 
@@ -195,4 +203,3 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId"
 });
 
 module.exports = router;
-
