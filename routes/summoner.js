@@ -126,7 +126,6 @@ router.get('/userName=:name', (req, res) => {
           }
 
         });
-
       
       }
 
@@ -143,50 +142,42 @@ router.get('/userName=:name', (req, res) => {
 router.post("/ajax/renew.json/", (req, res) => {
   console.log(colors.cyan(JSON.stringify(req.body)));
 
-  // db update
-  summonerDAO.findOne({ id: req.body.summonerId })
-  .then((summoner) => {
+  (async() => {
+    try {
+      let dbSummoner = await summonerDAO.findOne({ id: req.body.summonerId });
+      if(dbSummoner) {
+       
+        let riotSummoner = await riotAPI.getSummonerByEncryptedAccountId(dbSummoner.accountId);
+        if(riotSummoner) {
 
-    riotAPI.getSummonerByEncryptedAccountId(summoner.accountId)
-    .then((riotSummoner) => {
+          let riotLeagueEntries = await riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id);
+          if(riotLeagueEntries) {
+            riotSummoner["leagueEntries"] = riotLeagueEntries;
+            riotSummoner["upperCaseName"] = riotSummoner.name.trim().toUpperCase();
+          }
 
-      // update summoners collection
-      console.log(colors.cyan(riotSummoner));
+          summonerDAO.updateOne(dbSummoner.accountId, riotSummoner)
+          .then((result) => {
+            // dummy result, will be html tag result!!!
+            res.json({result: 1, detail: result});
+          })
+          .catch((err) => {
+            res.json({result: -1, detail: err});
+          });
 
-      riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id)
-      .then((leagueEntries) => {
-        
-        riotSummoner["leagueEntries"] = leagueEntries;
-        riotSummoner["upperCaseName"] = riotSummoner.name.trim().toUpperCase();
-
-        summonerDAO.updateOne(summoner.accountId, riotSummoner)
-        .then((result) => {
-          // dummy result, will be html tag result!!!
-          res.json({result: 1, detail: result});
-        })
-        .catch((err) => {
-          res.json({result: -1, detail: err});
-        });
-
-      })
-      .catch((err) => {
-        if(err) {
-          console.log(colors.red(err));
         }
-      });
-
-    })
-    .catch((err) => {
-      if(err) {
-        console.log(colors.red(err));
+        
+      } else {
+        console.log(colors.cyan("no summoner in db"));
+        res.json({result: -1, detail: "no summoner in db"});
       }
-    });
-  })
-  .catch((err) => {
-    if(err) {
-      console.log(colors.red(err));
+
+    } catch (error) {
+      console.log(colors.red(error));
+      res.json({result: -1, detail: error});
     }
-  });
+  
+  })();
 
 });
 
@@ -220,8 +211,6 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId"
   .catch((err) => {
     console.log(colors.bgRed(err));
   });
-
-
 
 });
 
