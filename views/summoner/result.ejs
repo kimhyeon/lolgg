@@ -179,19 +179,30 @@ button.addEventListener("click", (e) =>{
     console.warn(json);
     if(json.tierBoxes) {
       let sideContent = document.querySelector(".side-content"),
-      oldTierBoxes = document.querySelectorAll(".side-content__tier"),
-      i;
+        oldTierBoxes = document.querySelectorAll(".side-content__tier"),
+        i;
       
-      // remove
+      // remove tierBoxes
       for(i = 0; i < oldTierBoxes.length; i++) {
          let box = oldTierBoxes[i];
          box.parentNode.removeChild(box);
       }
 
-      // add
+      // add tierBoxes
       sideContent.insertAdjacentHTML("afterbegin", json.tierBoxes);
       
     }
+
+    if(json.matchItemList) {
+      // remove gameItemList
+      let oldGameItemList = document.querySelector(".gameItemList");
+      oldGameItemList.parentNode.removeChild(oldGameItemList);
+
+      let mainContent = document.querySelector(".main-content");
+      mainContent.insertAdjacentHTML("afterbegin", json.matchItemList);
+
+    }
+
   })
   .catch((err) => {
     console.error(err);

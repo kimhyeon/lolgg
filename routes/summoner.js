@@ -135,24 +135,31 @@ router.post("/ajax/renew.json/", (req, res) => {
         let riotSummoner = await riotAPI.getSummonerByEncryptedAccountId(dbSummoner.accountId);
         if(riotSummoner) {
 
+          
           let riotLeagueEntries = await riotAPI.getLeagueEntriesBySummonerId(riotSummoner.id);
           if(riotLeagueEntries) {
-
+            
             riotSummoner["leagueEntries"] = riotLeagueEntries;
             riotSummoner["upperCaseName"] = riotSummoner.name.trim().toUpperCase();
             // more ...????
 
+            // update summoner
+            summonerDAO.updateOne(dbSummoner.accountId, riotSummoner);
+          
           }
+          
+          let riotMatchList = await riotAPI.getMatchlistsByAccount(riotSummoner.accountId);
+          if(riotMatchList) {
+            matchlistService.renew(riotSummoner.accountId, riotMatchList);
 
-          summonerDAO.updateOne(dbSummoner.accountId, riotSummoner)
-          .then((result) => {
-            // dummy result, will be html tag result!!!
-            let tierBoxes = summonerService.getTierBoxesHTMLText(riotSummoner)
-            res.json({result: 1, detail: result, tierBoxes: tierBoxes});
-          })
-          .catch((err) => {
-            res.json({result: -1, detail: err});
-          });
+            let version = await staticService.getVersion(),
+              matchesHTMLText = await matchService.getMatchesHTMLText(riotSummoner.accountId, version, riotMatchList.matches.slice(0, 20));
+              
+            let tierBoxes = summonerService.getTierBoxesHTMLText(riotSummoner);
+
+            res.json({result: 1, tierBoxes: tierBoxes, matchItemList: matchesHTMLText});
+            
+          }
 
         }
         

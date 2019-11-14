@@ -72,3 +72,20 @@ exports.saveRiotMatchlist = (accountId) => {
     
   });
 }
+
+
+exports.renew = (accountId, riotMatchList) => {
+  return new Promise((resolve, reject) => {
+
+    matchListDAO.updateOne(accountId, riotMatchList)
+    .then((result) => {
+      resolve(result);
+    })
+    .catch((err) => {
+      reject(err);
+    });
+ 
+  });
+}
+
+
