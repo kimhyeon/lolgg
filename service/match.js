@@ -25,7 +25,7 @@ exports.getMatchesHTMLText = (accountId, version, matchlist) => {
         }
         // working here !!!!
 
-        console.log(colors.cyan(`${accountId} ${version} ${matches.length}`))
+        console.log(colors.cyan(`${accountId} ${version} ${matches.length} ${matchlist.length}`))
         resolve(getHTMLText(accountId, version, matches, lolggChampion.data));
 
       } catch(err) {
@@ -250,14 +250,26 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     };
 
   // inner functions
-  let getDaysAgoText = (gameCreation) => {
-    // 시차 적용 필요 !!!!! ???
-    let diff = new Date(new Date().getTime() - gameCreation);
-    if(diff.getMonth()) {
-      return `${diff.getMonth()}달 전`;
+  let getDaysAgoText = (gameCreation, duration) => {
+
+    let gameEndTime = gameCreation + duration * 1000,
+      diff = new Date().getTime() - gameEndTime;
+
+    let m = (diff / (60*1000)).toFixed(),
+      h = (m / 60).toFixed(),
+      d = (h / 24).toFixed(),
+      month = (d / 30).toFixed();
+
+    if(month > 0) {
+      return `${month}달 전`;
+    } else if(d > 0) {
+      return `${d}일 전`;
+    } else if(h > 0) {
+      return `${h}시간 전`;
     } else {
-      return `${diff.getDate()}일 전`;
+      return `${m}분 전`;
     }
+
   }
 
   let getDurationText = (duration) => {
@@ -307,6 +319,18 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
 
   }
 
+  let getGameResult = (win, duration) => {
+      if(duration < 300) {
+        return "다시하기";
+      } else {
+        if(win) {
+          return "승리";
+        } else {
+          return "패배";
+        }
+    }
+  }
+
   matches.forEach((match) => {
     let obj = {},
       participantIdentity = null,
@@ -337,28 +361,11 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["gameId"] = match.gameId;
 
     obj["queueName"] = queueName[match.queueId];
-    obj["gameCreation"] = getDaysAgoText(match.gameCreation);
-    obj["win"] = participant.stats.win ? "승리" : "패배";
-    obj["gameDuration"] = getDurationText(match.gameDuration);
+    obj["gameCreation"] = getDaysAgoText(match.gameCreation, match.gameDuration);
+    
+    //obj["win"] = participant.stats.win ? "승리" : "패배";
+    obj["win"] = getGameResult(participant.stats.win, match.gameDuration);
 
-    obj["championName"] = lolggChampion[participant.championId].name;
-    obj["championId"] = lolggChampion[participant.championId].id;
-    obj["championId_imgUrl"] = getChampionImgUrl(lolggChampion[participant.championId].id);
-    
-    obj["spell1Id"] = participant.spell1Id;
-    obj["spell2Id"] = participant.spell2Id;
-    obj["perk0"] = participant.stats.perk0;
-    obj["perkSubStyle"] = participant.stats.perkSubStyle;
-    
-    obj["kills"] = participant.stats.kills;
-    obj["deaths"] = participant.stats.deaths;
-    obj["assists"] = participant.stats.assists;
-    obj["KDARatio"] = ((obj["kills"] + obj["assists"]) / obj["deaths"]).toFixed(2) + ":1";
-      
-    obj["champLevel"] = participant.stats.champLevel;
-    obj["totalMinionsKilled"] = participant.stats.totalMinionsKilled + participant.stat
-    obj["gameCreation"] = getDaysAgoText(match.gameCreation);
-    obj["win"] = participant.stats.win ? "승리" : "패배";
     obj["gameDuration"] = getDurationText(match.gameDuration);
 
     obj["championName"] = lolggChampion[participant.championId].name;

@@ -107,8 +107,10 @@
               </div>
               <!-- //average-stats end -->
 
-              <%- matchItemList %>
-              
+              <div class="gameItemLists-container">
+                <%- matchItemList %>
+              </div>
+             
               <div id="matchMoreButton" class="matchMoreButton box" data-account-id="<%= summoner.accountId %>">
                 <a href="javascript:void(0)" class="button">더 보기</a>
               </div>
@@ -194,12 +196,18 @@ button.addEventListener("click", (e) =>{
     }
 
     if(json.matchItemList) {
-      // remove gameItemList
-      let oldGameItemList = document.querySelector(".gameItemList");
-      oldGameItemList.parentNode.removeChild(oldGameItemList);
 
-      let mainContent = document.querySelector(".main-content");
-      mainContent.insertAdjacentHTML("afterbegin", json.matchItemList);
+
+      let container = document.querySelector(".gameItemLists-container"),
+      oldGameItemLists = document.querySelectorAll(".gameItemList");
+      
+      // remove gameItemList
+      for(let i = 0; i < oldGameItemLists.length; i++) {
+        container.removeChild(oldGameItemLists[i]);
+      }
+
+      // add gameItemList
+      container.insertAdjacentHTML("afterbegin", json.matchItemList);
 
     }
 

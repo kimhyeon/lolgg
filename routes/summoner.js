@@ -53,7 +53,7 @@ router.get('/userName=:name', (req, res, next) => {
         
          if(dbMatchList) {
           let matches = dbMatchList.matches,
-            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches),
+            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches, 20),
             tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
             
           let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
@@ -66,7 +66,7 @@ router.get('/userName=:name', (req, res, next) => {
  
           let matchlist = await matchlistService.saveRiotMatchlist(dbSummoner.accountId);
           let matches = matchlist.matches,
-            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches.slice(0, 20)),
+            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches, 20),
             tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
 
           let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
@@ -84,7 +84,7 @@ router.get('/userName=:name', (req, res, next) => {
               version = await staticService.getVersion();
   
             let matches = matchlist.matches,
-              matchesHTMLText = await matchService.getMatchesHTMLText(summoner.accountId, version, matches.slice(0, 20)),
+              matchesHTMLText = await matchService.getMatchesHTMLText(summoner.accountId, version, matches, 20),
               tierBoxes = await summonerService.getTierBoxesHTMLText(summoner);
 
             let resData = summonerService.getSummonerResponse(summoner, tierBoxes, matchesHTMLText);
@@ -145,7 +145,7 @@ router.post("/ajax/renew.json/", (req, res) => {
 
             // update summoner
             summonerDAO.updateOne(dbSummoner.accountId, riotSummoner);
-          
+            
           }
           
           let riotMatchList = await riotAPI.getMatchlistsByAccount(riotSummoner.accountId);
@@ -153,7 +153,7 @@ router.post("/ajax/renew.json/", (req, res) => {
             matchlistService.renew(riotSummoner.accountId, riotMatchList);
 
             let version = await staticService.getVersion(),
-              matchesHTMLText = await matchService.getMatchesHTMLText(riotSummoner.accountId, version, riotMatchList.matches.slice(0, 20));
+              matchesHTMLText = await matchService.getMatchesHTMLText(riotSummoner.accountId, version, riotMatchList.matches, 20);
               
             let tierBoxes = summonerService.getTierBoxesHTMLText(riotSummoner);
 
