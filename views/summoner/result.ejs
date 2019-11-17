@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>TEST</title>
   <link rel='stylesheet' href='/stylesheets/common.css'/>
@@ -119,7 +119,8 @@
                   document.getElementById("matchMoreButton").addEventListener("click", (e) => {
                     let button = e.target.closest("div"),
                       accountId = button.dataset.accountId;
-                      lastGameId = button.previousElementSibling.dataset.lastGameid;
+                      lastGameId = document.querySelector(".gameItemLists-container > .gameItemList:last-child").dataset.lastGameid;
+                   
                     console.log(accountId, lastGameId);
              
                     let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}`;
@@ -196,7 +197,6 @@ button.addEventListener("click", (e) =>{
     }
 
     if(json.matchItemList) {
-
 
       let container = document.querySelector(".gameItemLists-container"),
       oldGameItemLists = document.querySelectorAll(".gameItemList");

@@ -181,6 +181,8 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId"
   let startInfo = req.params.startInfo,
     accountId = req.params.accountId;
 
+    console.log(colors.cyan("startInfo"), startInfo);
+
   // nal build
   matchlistService.getMatchlist(accountId, startInfo)
   .then((matchlist) => {
@@ -189,7 +191,7 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId"
     (async () => {
       try {
 
-        let version = await staticService.checkVersion();
+        let version = await staticService.getVersion();
 
         let matches = matchlist.matches,
           matchesHTMLText = await matchService.getMatchesHTMLText(accountId, version, matches);

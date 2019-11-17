@@ -3,7 +3,9 @@ const riotAPI = require('../server/riotAPI');
 const matchListDAO = require('../persistent/matchlist');
 
 exports.getMatchlist = (accountId, startInfo, limit) => {
-  const LIMIT = limit;
+  let LIMIT = limit;
+  LIMIT = (!LIMIT) ? 10 : limit;
+
   return new Promise((resolve, reject) => {
   
     matchListDAO.findOne({accountId: accountId})

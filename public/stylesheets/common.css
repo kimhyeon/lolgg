@@ -115,7 +115,7 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItem .gameSettingInfo .championImage .image{display:block;width:100%;height:100%;background-color:#000;}
 .gameItem .gameSettingInfo .championName{margin-top:8px;font-size:11px;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gameItem .gameSettingInfo .championName > a{text-decoration:none;color:inherit;}
-.gameItem .score{font-size:11px;text-align:center;}
+.gameItem .score{font-size:11px;text-align:center;width:113px;}
 .gameItem .score .KDA{font-size:15px;color:#879292;white-space:nowrap;}
 .gameItem .score .KDA .kills, .gameItem .score .KDA .assists{color:#555e5e;font-weight:bold;}
 .gameItem .score .KDA .deaths{color:#c6443e;font-weight:bold;}
@@ -127,6 +127,7 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItem .items .itemList{width:96px;margin:0 auto;}
 .gameItem .items .itemList .item{display:inline-block;width:22px;height:22px;border-radius:3px;margin-top:2px;margin-right:2px;overflow:hidden;}
 .gameItem.win .items .itemList .item{background-color:#99b9cf;}
+.gameItem.lose .items .itemList .item{background-color:#cea7a7;}
 .gameItem .items .itemList .item .image{width:100%; height:100%;}
 .gameItem .items .pickWard{margin-top:7px;color:#353a3a;line-height:13px;font-size:11px;text-align:center;}
 .gameItem .items .pickWard img{vertical-align:middle;}

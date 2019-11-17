@@ -21,8 +21,17 @@ exports.getMatchesHTMLText = (accountId, version, matchlist) => {
           } else {
             let riotMatch = await riotAPI.getMatchByMatchId(temp.gameId); 
             matches.push(riotMatch);
+
+            matchDAO.save(riotMatch)
+            .then((match) => {
+              console.log(colors.green("match save ok"));
+            })
+            .catch((err) => {
+              console.log(colors.red("match save ok"));
+            });            
           }
         }
+        
         // working here !!!!
 
         console.log(colors.cyan(`${accountId} ${version} ${matches.length} ${matchlist.length}`))
@@ -284,8 +293,24 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
       let participant = teamParticipant[i];
       killSums += participant.stats.kills;
     }
-    return (((participant.stats.kills + participant.stats.assists) / killSums) * 100).toFixed(0); 
+    if(killSums === 0) {
+      return "0";
+    } else {
+      return (((participant.stats.kills + participant.stats.assists) / killSums) * 100).toFixed(0); 
+    }
   }
+
+  let getKDARatio = (kills, deaths, assists) => {
+    if(deaths === 0) {
+      if(kills ===0 && assists === 0 ) {
+        return "0.00:1";
+      } else {
+        return "Perfect";
+      }
+    } else {
+      return ((kills + assists) / deaths).toFixed(2) + ":1";
+    }
+  } 
 
   let getChampionImgUrl = (championId) => {
     return `http://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${championId}.png`;
@@ -380,7 +405,10 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["kills"] = participant.stats.kills;
     obj["deaths"] = participant.stats.deaths;
     obj["assists"] = participant.stats.assists;
-    obj["KDARatio"] = ((obj["kills"] + obj["assists"]) / obj["deaths"]).toFixed(2) + ":1";
+
+
+    // obj["KDARatio"] = ((obj["kills"] + obj["assists"]) / obj["deaths"]).toFixed(2) + ":1";
+    obj["KDARatio"] = getKDARatio(obj["kills"], obj["deaths"], obj["assists"]);
       
     obj["champLevel"] = participant.stats.champLevel;
     obj["totalMinionsKilled"] = participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled + " CS";
