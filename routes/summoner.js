@@ -53,7 +53,7 @@ router.get('/userName=:name', (req, res, next) => {
         
          if(dbMatchList) {
           let matches = dbMatchList.matches,
-            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches, 20),
+            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches),
             tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
             
           let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
@@ -66,7 +66,7 @@ router.get('/userName=:name', (req, res, next) => {
  
           let matchlist = await matchlistService.saveRiotMatchlist(dbSummoner.accountId);
           let matches = matchlist.matches,
-            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches, 20),
+            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches),
             tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
 
           let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
@@ -84,7 +84,7 @@ router.get('/userName=:name', (req, res, next) => {
               version = await staticService.getVersion();
   
             let matches = matchlist.matches,
-              matchesHTMLText = await matchService.getMatchesHTMLText(summoner.accountId, version, matches, 20),
+              matchesHTMLText = await matchService.getMatchesHTMLText(summoner.accountId, version, matches),
               tierBoxes = await summonerService.getTierBoxesHTMLText(summoner);
 
             let resData = summonerService.getSummonerResponse(summoner, tierBoxes, matchesHTMLText);
@@ -153,7 +153,7 @@ router.post("/ajax/renew.json/", (req, res) => {
             matchlistService.renew(riotSummoner.accountId, riotMatchList);
 
             let version = await staticService.getVersion(),
-              matchesHTMLText = await matchService.getMatchesHTMLText(riotSummoner.accountId, version, riotMatchList.matches, 20);
+              matchesHTMLText = await matchService.getMatchesHTMLText(riotSummoner.accountId, version, riotMatchList.matches);
               
             let tierBoxes = summonerService.getTierBoxesHTMLText(riotSummoner);
 
@@ -181,33 +181,57 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId"
   let startInfo = req.params.startInfo,
     accountId = req.params.accountId;
 
-    console.log(colors.cyan("startInfo"), startInfo);
+  console.log(colors.cyan("startInfo"), startInfo);
 
-  // nal build
-  matchlistService.getMatchlist(accountId, startInfo)
-  .then((matchlist) => {
-    console.log(Array.isArray(matchlist.matches), matchlist.matches.length);
-
-    (async () => {
-      try {
-
-        let version = await staticService.getVersion();
-
-        let matches = matchlist.matches,
+  (async() => {
+    try {
+      let matchlist = await matchlistService.getMatchlist(accountId, startInfo);
+      if(matchlist) {
+        let version = await staticService.getVersion(),
+          matches = matchlist.matches,
           matchesHTMLText = await matchService.getMatchesHTMLText(accountId, version, matches);
-
         res.json({result: 1, html: matchesHTMLText});
+      } else {
+        // null
+        // save past datas
+        let matchlist = await matchlistService.getAllMatchlist(accountId),
+          lastMatch = matchlist.matches[matchlist.matches.length - 1];
+        
+        console.warn(matchlist.matches.length, lastMatch.timestamp, lastMatch.role, colors.cyan(lastMatch));
 
-      } catch(err) {
-        console.log(colors.red(err));
+        await matchlistService.saveRiotMatchlistOfPast20weeks(accountId, lastMatch.timestamp);
+
       }
+    } catch (error) {
+      console.log(colors.red(error));
+    }
+  })();
 
-    })();
 
-  })
-  .catch((err) => {
-    console.log(colors.bgRed(err));
-  });
+  // matchlistService.getMatchlist(accountId, startInfo)
+  // .then((matchlist) => {
+  //   console.log(Array.isArray(matchlist.matches), matchlist.matches.length);
+
+  //   (async () => {
+  //     try {
+
+  //       let version = await staticService.getVersion();
+
+  //       let matches = matchlist.matches,
+  //         matchesHTMLText = await matchService.getMatchesHTMLText(accountId, version, matches);
+
+  //       res.json({result: 1, html: matchesHTMLText});
+
+  //     } catch(err) {
+  //       console.log(colors.red(err));
+  //     }
+
+  //   })();
+
+  // })
+  // .catch((err) => {
+  //   console.log(colors.bgRed(err));
+  // });
 
 });
 

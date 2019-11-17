@@ -2,9 +2,22 @@ const colors = require('colors');
 const riotAPI = require('../server/riotAPI');
 const matchListDAO = require('../persistent/matchlist');
 
+getAllMatchlist = (accountId) => {
+  return new Promise((resolve, reject) => {
+    matchListDAO.findOne({accountId: accountId})
+    .then((matchlist) => {
+      resolve(matchlist);
+    })
+    .catch((err) => {
+      reject(err);
+    });
+  });
+}
+exports.getAllMatchlist = getAllMatchlist;
+
 exports.getMatchlist = (accountId, startInfo, limit) => {
   let LIMIT = limit;
-  LIMIT = (!LIMIT) ? 10 : limit;
+    LIMIT = (!LIMIT) ? 10 : limit;
 
   return new Promise((resolve, reject) => {
   
@@ -12,10 +25,6 @@ exports.getMatchlist = (accountId, startInfo, limit) => {
     .then((matchlist) => {
 
       if(startInfo) {
-
-        // let index = matchlist.matches.findIndex((match) => {
-        //   return match.gameId === startInfo; 
-        // });
 
         console.log(colors.magenta(Array.isArray(matchlist.matches)), startInfo);
 
@@ -31,9 +40,17 @@ exports.getMatchlist = (accountId, startInfo, limit) => {
         if(index) {
           matchlist.matches = matchlist.matches.slice(index + 1, index + 1 + LIMIT); 
           console.log(colors.magenta(index + 1, index + 1 + LIMIT, matchlist.matches.length));
-          resolve(matchlist)
+          
+          if(index + 1 > matchlist.matches.length) {
+            console.log("need to get past matchlists!!");
+            resolve(null);
+          }
+          
+          resolve(matchlist);
+
         } else {
-          console.log(colors.magenta("Save more matches of mathchlist!!!!!!"));
+          console.log(colors.error("INDEX CAN'NOT BE NULL!!"));
+          reject("INDEX CAN'NOT BE NULL!!");
         }
 
       } else {
@@ -55,7 +72,6 @@ exports.getMatchlist = (accountId, startInfo, limit) => {
 
 exports.saveRiotMatchlist = (accountId) => {
   return new Promise((resolve, reject) => {
-
     riotAPI.getMatchlistsByAccount(accountId)
     .then((matchList) => {
       matchListDAO.save(accountId, matchList)
@@ -75,6 +91,40 @@ exports.saveRiotMatchlist = (accountId) => {
   });
 }
 
+exports.saveRiotMatchlistOfPast20weeks = (accountId, startTimestampInfo) => {
+  return new Promise((resolve, reject) => {
+    
+    (async() => {
+
+      try {
+        let timestampInfo = startTimestampInfo,
+          oneWeekMillisecond = 604800000,
+          pastMatchlist = [];
+  
+        for(let i = 0; i < 20; i++) {
+          let riotMatchlist = await riotAPI.getMatchlistsByAccount(accountId, timestampInfo);
+          if(riotMatchlist) {
+            pastMatchlist =  pastMatchlist.concat(riotMatchlist.matches);
+            console.log(pastMatchlist.length, riotMatchlist.matches.length, Array.isArray(riotMatchlist.matches));
+          } 
+          timestampInfo = timestampInfo - oneWeekMillisecond;
+        }
+      
+        
+        let dbMatchlist = await getAllMatchlist(accountId);
+        dbMatchlist.matches = dbMatchlist.matches.concat(pastMatchlist);
+        console.log(dbMatchlist.matches.length);
+        
+        // update matchlist matches...
+        matchListDAO.updateOne(accountId, dbMatchlist);
+          
+      } catch (error) {
+        
+      }
+
+    })();
+  });
+}
 
 exports.renew = (accountId, riotMatchList) => {
   return new Promise((resolve, reject) => {
