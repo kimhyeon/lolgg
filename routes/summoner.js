@@ -82,7 +82,7 @@ router.get('/userName=:name', (req, res, next) => {
 
           try {
             //let matchlist = await matchlistService.saveFirstRiotMatchlist(summoner.accountId),
-            let matchlist = await matchlistService.saveRiotMatchlistOfPast20weeks(dbSummoner.accountId, new Date().getTime()),
+            let matchlist = await matchlistService.saveFirstRiotMatchlist(summoner.accountId),
               version = await staticService.getVersion();
   
             let matches = matchlist.matches,
