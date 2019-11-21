@@ -60,13 +60,24 @@ exports.getLeagueEntriesBySummonerId = (summonerId) => {
   const url = "https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/",
     sendURL = `${url}${summonerId}?api_key=${API_KEY}`;
 
-    console.log(`getLeagueEntriesBySummonerId(summonerId=${summonerId})`.blue);
+  console.log(`getLeagueEntriesBySummonerId(summonerId=${summonerId})`.blue);
 
-    return new Promise((resolve, reject) => {
-      apiRequest(sendURL, resolve, reject);
-    });
+  return new Promise((resolve, reject) => {
+    apiRequest(sendURL, resolve, reject);
+  });
 
-  }
+}
+
+exports.getMathList = (accountId, paramString) => {
+  const url = "https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/";
+  
+  let sendURL = `${url}${accountId}?api_key=${API_KEY}${paramString}`;
+  console.log(`getMathList(accountId=${accountId})`.blue, `paramString`.blue);
+
+  return new Promise((resolve, reject) => {
+    apiRequest(sendURL, resolve, reject);
+  });
+}
 
 exports.getMatchlistsByAccount = (accountId, endTime) => {
   const url = "https://kr.api.riotgames.com/lol/match/v4/matchlists/by-account/",

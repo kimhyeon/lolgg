@@ -230,12 +230,10 @@ let getHTMLText = (accountId, version, matches, lolggChampion) => {
   }
 
   let lastGameId = gamesData[gamesData.length - 1].gameId, 
-    // gameItemList = tag("div", {"class": "gameItemList", "data-last-gameid": String(lastGameId)}, false);
-    gameItemList = tag("div", {"class": "gameItemList", "data-last-gameid": String(3682530796)}, false);
+    gameItemList = tag("div", {"class": "gameItemList", "data-last-gameid": String(lastGameId)}, false);
   
   gamesData.forEach((game) => {
     gameItemList += gameItemHTMLText(game);
-
   });
 
   gameItemList += "</div>";

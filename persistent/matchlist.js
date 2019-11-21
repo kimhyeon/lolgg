@@ -12,13 +12,13 @@ exports.findOne = (query) => {
   });
 }
 
-exports.save = (accountId, riotMatchlist) => {
+exports.save = (accountId, matches) => {
   return new Promise((resolve, reject) => {
 
     let matchlist = new matchlistModel({
       accountId: accountId,
-      matches: riotMatchlist.matches,
-      totalGames: riotMatchlist.matches.length
+      matches: matches,
+      totalGames: matches.length
     });
 
     matchlist.save((err, matchlist) => {

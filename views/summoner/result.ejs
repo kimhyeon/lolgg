@@ -119,6 +119,7 @@
                   document.getElementById("matchMoreButton").addEventListener("click", (e) => {
                     let button = e.target.closest("div"),
                       accountId = button.dataset.accountId;
+                      container = document.querySelector(".gameItemLists-container"),
                       lastGameId = document.querySelector(".gameItemLists-container > .gameItemList:last-child").dataset.lastGameid;
                    
                     console.log(accountId, lastGameId);
@@ -136,7 +137,9 @@
                       
                     })
                     .then((json) => {
-                      button.insertAdjacentHTML("beforebegin", json.html);
+                      container.insertAdjacentHTML("beforeend", json.html);
+                      
+                      // button.insertAdjacentHTML("beforebegin", json.html);
                       // console.log(JSON.stringify(json));
                     })
                     .catch((err) => {
