@@ -172,24 +172,27 @@ router.post("/ajax/renew.json/", (req, res) => {
 
 });
 
-router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId", (req, res) => {
+router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId&type=:type", (req, res) => {
   let startInfo = req.params.startInfo,
-    accountId = req.params.accountId;
+    accountId = req.params.accountId,
+    type = req.params.type;
 
   console.log(colors.cyan("startInfo"), startInfo);
   (async() => {
     let version = await staticService.getVersion(),
-      matches = await matchlistService.getMore20Matchlist(accountId, startInfo);
+      matches = await matchlistService.get20Matchlist(accountId, startInfo, type);
 
       if(!!matches.length) {
         let matchesHTMLText = await matchService.getMatchesHTMLText(accountId, version, matches);
+        if(startInfo == 0) {
+          matchesHTMLText += matchService.getMoreMatchBtnHTMLText(accountId);
+        }
         res.json({result: 1, html: matchesHTMLText});
       } else {
         res.json({result: 1, html: "<h3>기록된 전적이 없습니다.</h3>"});
       }
 
   })();
-
 });
 
 module.exports = router;

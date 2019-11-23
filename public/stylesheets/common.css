@@ -81,11 +81,11 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .main-content{display:inline-block;width:690px;margin-top:10px;margin-left:10px;font-size:12px;vertical-align:top;}
 .main-content >.navigation{position:relative;border-bottom:1px solid #cdd2d2;height:35px; overflow: hidden;}
 .navigation > .list{display:block;font-size:0;padding-left:10px;}
-.navigation .list__item{font-size:12px;display:inline-block;height:32px;margin:0 10px;vertical-align:top;}
+.navigation .list__item{font-size:12px;display:inline-block;height:31px;margin:0 10px;vertical-align:top;}
 .navigation .list__item--active{border-bottom:2px solid #1f8ecd;}
-.navigation .list__item-link{color:#555e5e;font-size:12px;line-height:36px;text-decoration:none;}
+.navigation .list__item-link{color:#555e5e;font-size:12px;line-height:36px;text-decoration:none;display:inline-block;}
 .navigation .list__item-link:hover{color:#242929}
-.navigation .list__item.list__item--active > a{color:#1f8ecd;font-weight:bold;}
+.navigation .list__item.list__item--active > a{color:#1f8ecd;font-weight:bold;line-height: 36px;}
 .navigation.box{box-shadow:none;}
 .list__item-queue-select{-webkit-appearance: none;-moz-appearance: none;text-indent: 1px;text-overflow:'';border:none;background:transparent;font-size:12px;color:#555e5e;cursor:pointer;outline:none;margin-top:9px;padding-bottom:4px;}
 .list__item-queue-select:hover{color:#242929}
@@ -101,14 +101,17 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItemList{margin-top:8px}
 .gameItemList .gameItem.win{margin-bottom:8px;position:relative;background-color: #a3cfec;border:1px solid #99b9cf;}
 .gameItemList .gameItem.lose{margin-bottom:8px;position:relative;background-color: #e2b6b3;border:1px solid #cea7a7;}
+.gameItemList .gameItem.regame{margin-bottom:8px;position:relative;background-color: #b6b6b6;border:1px solid #a7a7a7;}
 .gameItem > div{display:table-cell;vertical-align:middle;height:96px;}
 .gameItem .gameStats{width:70px;text-align:center;font-size:11px;color:#555;line-height:16px;}
 .gameItem .gameStats .bar{display:block;width:27px;margin:5px auto;height:2px;background-color:#cdd2d2;}
 .gameItem.win .gameStats .bar{background-color:#99b9cf;}
 .gameItem.lose .gameStats .bar{background-color:#cea7a7;}
+.gameItem.regame .gameStats .bar{background-color:#a7a7a7;}
 .gameItem .gameStats .gameResult{font-weight:bold;}
 .gameItem.win .gameStats .gameResult{color:#1a78ae;}
 .gameItem.lose .gameStats .gameResult{color:#c6443e;}
+.gameItem.regame .gameStats .gameResult{color:#000;}
 .gameItem .gameSettingInfo{width:100px;text-align:center;}
 .gameItem .gameSettingInfo .championImage{display:inline-block;width:46px;height:46px;vertical-align:middle;border-radius:50%;overflow:hidden;}
 .gameItem .gameSettingInfo .championImage > a{text-decoration:none;color:inherit;}
@@ -128,6 +131,7 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItem .items .itemList .item{display:inline-block;width:22px;height:22px;border-radius:3px;margin-top:2px;margin-right:2px;overflow:hidden;}
 .gameItem.win .items .itemList .item{background-color:#99b9cf;}
 .gameItem.lose .items .itemList .item{background-color:#cea7a7;}
+.gameItem.regame .items .itemList .item{background-color:#a7a7a7;}
 .gameItem .items .itemList .item .image{width:100%; height:100%;}
 .gameItem .items .pickWard{margin-top:7px;color:#353a3a;line-height:13px;font-size:11px;text-align:center;}
 .gameItem .items .pickWard img{vertical-align:middle;}

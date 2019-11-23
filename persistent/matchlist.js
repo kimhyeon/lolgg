@@ -42,3 +42,24 @@ exports.updateOne = (accountId, newMatchlist) => {
     });
   });
 }
+
+exports.getMathListOfQueue = (accountId, queue) => {
+  return new Promise((resolve, reject) => {
+    matchlistModel.aggregate([ 
+      { $match: {accountId: accountId} }, 
+      { $project: { 
+          accountId: 1,
+          matches: { 
+            $filter: { input: "$matches", as: "match", cond: { $eq: ["$$match.queue", queue] } }
+          }
+        }
+      } 
+    ], (err, result) => {
+      if(err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}

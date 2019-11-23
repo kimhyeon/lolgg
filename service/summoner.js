@@ -64,7 +64,7 @@ exports.getSummonerResponse = (summoner, tierBoxes, matchesHTMLText) => {
     matchItemList: matchesHTMLText
   };
 
-  console.log(colors.yellow(resData));
+  // console.log(colors.yellow(resData));
 
   return resData;
 

@@ -27,7 +27,7 @@ exports.getMatchesHTMLText = (accountId, version, matchlist) => {
               console.log(colors.green("match save ok"));
             })
             .catch((err) => {
-              console.log(colors.red("match save ok"));
+              console.log(colors.red("match save fail"));
             });            
           }
         }
@@ -53,7 +53,11 @@ let getHTMLText = (accountId, version, matches, lolggChampion) => {
   let gameItemHTMLText = (game) => {
     
     let gameItem = null;
-    if(game.win === "승리") {
+
+    
+    if(game.duration < 300) {
+      gameItem = tag("div", {class: "gameItem regame"}, false);
+    } else if(game.win === "승리") {
       gameItem = tag("div", {class: "gameItem win"}, false);
     } else {
       gameItem = tag("div", {class: "gameItem lose"}, false);
@@ -239,7 +243,7 @@ let getHTMLText = (accountId, version, matches, lolggChampion) => {
   gameItemList += "</div>";
 
   // console.log(tag('a', {href: 'https://sellside.com'}, accountId));
-  console.log(colors.cyan(gameItemList));
+  // console.log(colors.cyan(gameItemList));
   return gameItemList;
     
 }
@@ -389,6 +393,7 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     
     //obj["win"] = participant.stats.win ? "승리" : "패배";
     obj["win"] = getGameResult(participant.stats.win, match.gameDuration);
+    obj["duration"] = match.gameDuration;
 
     obj["gameDuration"] = getDurationText(match.gameDuration);
 
@@ -441,3 +446,11 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
   return list
 
 };
+
+exports.getMoreMatchBtnHTMLText = (accountId) => {
+  return `
+    <div id="matchMoreButton" class="matchMoreButton box" data-account-id="${accountId}">
+      <a href="javascript:void(0)" class="button">더 보기</a>
+    </div>
+  `
+}

@@ -26,7 +26,7 @@
               <% if(border && border !== "") { %>
                 <img class="profile-icon__border-image" src="/images/border/<%= border %>.png"></img>
               <% } %>
-
+              
               <img src="http://ddragon.leagueoflegends.com/cdn/9.21.1/img/profileicon/<%=summoner.profileIconId%>.png" class="profile-icon__image" >
               <span class="profile-icon__level"><%= summoner.summonerLevel %></span>
             </div>
@@ -62,7 +62,7 @@
                 <%- tierBoxes %>
 
             </div>
-            <div class="main-content">
+            <div class="main-content" data-account-id="<%= summoner.accountId %>">
               <!-- //navigation start -->
               <div class="navigation box">
                 <ul class="list">
@@ -78,79 +78,84 @@
                   <li class="list__item list__item" data-type="etc">
                     <select name="etc" class="list__item-queue-select">
                         <option value="">큐타입</option>
-                        <option value="학생">일반 (비공개 선택)</option>
-                        <option value="회사원">무작위 총력전</option>
-                        <option value="기타">AI 상대 대전</option>
-                        <option value="기타">이벤트 게임</option>
+                        <option value="normal">일반 (비공개 선택)</option>
+                        <option value="aram">무작위 총력전</option>
+                        <!-- <option value="bot">AI 상대 대전</option> -->
+                        <option value="event">이벤트 게임</option>
                     </select>
                   </li>
                 </ul>
               </div>
               <!-- //navigation end -->
-              <!-- //average-stats start -->
-              <div class="average-stats">
-                <div class="match">
-                  <div class="match__stats">20전 9승 10패</div>
-                  <div class="match__graph">
-                    <div id=matchGraph>
-                      Graph HERE
+
+              <!-- //main-content__body start-->
+              <div class="main-content__body">
+                <!-- //average-stats start -->
+                <div class="average-stats">
+                  <div class="match">
+                    <div class="match__stats">20전 9승 10패</div>
+                    <div class="match__graph">
+                      <div id=matchGraph>
+                        Graph HERE
+                      </div>
                     </div>
-                  </div>
-                  <div class="match__KDA">
-                    <div class="KDA">5.4 / 5.0 / 7.9</div>
-                    <div class="KDARatio">
-                      <span>2.65:1</span> 
-                      <span>(44%)</span>
+                    <div class="match__KDA">
+                      <div class="KDA">5.4 / 5.0 / 7.9</div>
+                      <div class="KDARatio">
+                        <span>2.65:1</span> 
+                        <span>(44%)</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <!-- //average-stats end -->
+                <!-- //average-stats end -->
 
-              <div class="gameItemLists-container">
-                <%- matchItemList %>
-              </div>
+                <div class="gameItemLists-container">
+                  <%- matchItemList %>
+                </div>
              
-              <div id="matchMoreButton" class="matchMoreButton box" data-account-id="<%= summoner.accountId %>">
-                <a href="javascript:void(0)" class="button">더 보기</a>
-              </div>
-              <script>
-                (() => {
-                  document.getElementById("matchMoreButton").addEventListener("click", (e) => {
-                    let button = e.target.closest("div"),
-                      accountId = button.dataset.accountId;
-                      container = document.querySelector(".gameItemLists-container"),
-                      lastGameId = document.querySelector(".gameItemLists-container > .gameItemList:last-child").dataset.lastGameid;
-                   
-                    console.log(accountId, lastGameId);
-             
-                    let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}`;
-                    fetch(url, {
-                      method: 'get',
-                      headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                      },
-                    })
-                    .then((res) => {
-                      return res.json();
+                <div id="matchMoreButton" class="matchMoreButton box" data-account-id="<%= summoner.accountId %>">
+                  <a href="javascript:void(0)" class="button">더 보기</a>
+                </div>
+                <script>
+
+                  // 더보기 버튼
+                  (() => {
+                    document.getElementById("matchMoreButton").addEventListener("click", (e) => {
+                      let button = e.target.closest("div"),
+                        accountId = button.dataset.accountId;
+                        container = document.querySelector(".gameItemLists-container"),
+                        lastGameId = document.querySelector(".gameItemLists-container > .gameItemList:last-child").dataset.lastGameid;
                       
-                    })
-                    .then((json) => {
-                      container.insertAdjacentHTML("beforeend", json.html);
-                      
-                      // button.insertAdjacentHTML("beforebegin", json.html);
-                      // console.log(JSON.stringify(json));
-                    })
-                    .catch((err) => {
-                      console.error(err);
+                      let type = document.querySelector(".list__item.list__item--active").dataset.type;
+                      type = (type === "etc") ? document.querySelector(".list__item-queue-select").value : type;
+                      console.log(accountId, lastGameId, type);
+              
+                      let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
+                      fetch(url, {
+                        method: 'get',
+                        headers: {
+                          'Accept': 'application/json',
+                          'Content-Type': 'application/json'
+                        },
+                      })
+                      .then((res) => {
+                        return res.json();
+                      })
+                      .then((json) => {
+                        container.insertAdjacentHTML("beforeend", json.html);
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                      });
+
+
                     });
 
-
-                  });
-
-                })();
-              </script>
+                  })();
+                </script>
+              </div>
+              <!-- //main-content__body end-->
 
             </div>
           </div>
@@ -167,58 +172,139 @@
 </body>
 
 <script>
-let button = document.getElementById("summonerRefreshButton");
-button.addEventListener("click", (e) =>{
-  console.warn(e.target.dataset.summonerId, e);
-  fetch("/summoner/ajax/renew.json/", {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({summonerId: e.target.dataset.summonerId})
-  })
-  .then((res) => {
-    return res.json();
-  })
-  .then((json) => {
-    console.warn(json);
-    if(json.tierBoxes) {
-      let sideContent = document.querySelector(".side-content"),
-        oldTierBoxes = document.querySelectorAll(".side-content__tier"),
-        i;
+
+// game list navigation tabs
+(() => {
+  
+  let getGameList = (type, lastGameId) => {
+
+    let accountId = document.querySelector(".main-content").dataset.accountId;
       
-      // remove tierBoxes
-      for(i = 0; i < oldTierBoxes.length; i++) {
-         let box = oldTierBoxes[i];
-         box.parentNode.removeChild(box);
+    lastGameId = (lastGameId) ? lastGameId : 0;
+
+    let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
+    fetch(url, {
+      method: 'get',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    })
+    .then((res) => {
+      return res.json();
+    })
+    .then((json) => {
+
+      // clear main-content__body
+      let nodes = document.querySelectorAll(".main-content__body > div");
+      for(let i = 0; i < nodes.length; i++) {
+        nodes[i].remove();
       }
 
-      // add tierBoxes
-      sideContent.insertAdjacentHTML("afterbegin", json.tierBoxes);
-      
-    }
-
-    if(json.matchItemList) {
-
-      let container = document.querySelector(".gameItemLists-container"),
-      oldGameItemLists = document.querySelectorAll(".gameItemList");
-      
-      // remove gameItemList
-      for(let i = 0; i < oldGameItemLists.length; i++) {
-        container.removeChild(oldGameItemLists[i]);
-      }
+      let container = document.querySelector(".main-content__body");
 
       // add gameItemList
-      container.insertAdjacentHTML("afterbegin", json.matchItemList);
+      container.insertAdjacentHTML("afterbegin", json.html);
+
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+  }
+
+  let clickFunc = (event) => {
+    let activeTab = event.target.parentElement;
+    let queueType = activeTab.dataset.type;
+    
+    if(queueType === "etc") {
+      let selectValue = document.querySelector(".navigation .list .list__item-queue-select").value;
+      if(selectValue !== "") {
+        queueType = selectValue;
+      } else {
+        queueType = "";
+      }
+    } 
+
+    if(queueType !== "") {
+      let tabs = activeTab.parentElement.children;
+      console.log(queueType);
+
+      for(let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("list__item--active");
+      }
+      activeTab.classList.add("list__item--active");
+      
+
+
+      getGameList(queueType);
 
     }
+  }
+  
+  let tabs = document.querySelectorAll(".navigation .list .list__item");
+  for(let i = 0; i < tabs.length; i++) {
+    tabs[i].addEventListener("click", clickFunc);
+  }
+  
+})();
 
-  })
-  .catch((err) => {
-    console.error(err);
+// renew btn
+(() => {
+  let button = document.getElementById("summonerRefreshButton");
+  button.addEventListener("click", (e) => {
+    console.warn(e.target.dataset.summonerId, e);
+
+    fetch("/summoner/ajax/renew.json/", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({summonerId: e.target.dataset.summonerId})
+    })
+    .then((res) => {
+      return res.json();
+    })
+    .then((json) => {
+      console.warn(json);
+      if(json.tierBoxes) {
+        let sideContent = document.querySelector(".side-content"),
+          oldTierBoxes = document.querySelectorAll(".side-content__tier"),
+          i;
+        
+        // remove tierBoxes
+        for(i = 0; i < oldTierBoxes.length; i++) {
+          let box = oldTierBoxes[i];
+          box.parentNode.removeChild(box);
+        }
+        // add tierBoxes
+        sideContent.insertAdjacentHTML("afterbegin", json.tierBoxes);
+        
+      }
+
+      if(json.matchItemList) {
+
+        let container = document.querySelector(".gameItemLists-container"),
+        oldGameItemLists = document.querySelectorAll(".gameItemList");
+        
+        // remove gameItemList
+        for(let i = 0; i < oldGameItemLists.length; i++) {
+          container.removeChild(oldGameItemLists[i]);
+        }
+
+        // add gameItemList
+        container.insertAdjacentHTML("afterbegin", json.matchItemList);
+
+      }
+
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+    
   });
-});
+
+})();
 
 </script>
 
