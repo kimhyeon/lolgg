@@ -54,17 +54,29 @@ exports.saveRiotSummoner = async (name) => {
 
 }
 
-exports.getSummonerResponse = (summoner, tierBoxes, matchesHTMLText) => {
+// exports.getSummonerResponse = (summoner, tierBoxes, matchesHTMLText) => {
+  
+//   let resData = {
+//     searchForm: true,
+//     summoner: summoner,
+//     border: (summoner.tier === "grandmaster") ? "master" : summoner.tier,
+//     tierBoxes: tierBoxes,
+//     matchItemList: matchesHTMLText
+//   };
+
+//   return resData;
+
+// }
+
+exports.getSummonerResponse = (summoner, tierBoxes, mainContentHTMLText) => {
   
   let resData = {
     searchForm: true,
     summoner: summoner,
     border: (summoner.tier === "grandmaster") ? "master" : summoner.tier,
     tierBoxes: tierBoxes,
-    matchItemList: matchesHTMLText
+    mainContentHTMLText: mainContentHTMLText
   };
-
-  // console.log(colors.yellow(resData));
 
   return resData;
 

@@ -12,6 +12,8 @@ const summonerService = require('../service/summoner');
 const matchlistService = require('../service/matchlist');
 const matchService = require('../service/match');
 
+const htmlService = require('../service/html');
+
 const summonerDAO = require('../persistent/summoner');
 
 router.get(['/', '/userName', '/userName='], (req, res) => {
@@ -47,32 +49,27 @@ router.get('/userName=:name', (req, res, next) => {
 
       let dbSummoner = await summonerService.getSummoner(upperCaseName);
       if (dbSummoner) {
-
-        let dbMatchList = await matchlistService.getAllMatchlist(dbSummoner.accountId),
+       
+        let matches = await matchlistService.get20Matchlist(dbSummoner.accountId, 0, "total"),
          version = await staticService.getVersion();
         
-         if(dbMatchList) {
-          let matches = dbMatchList.matches.slice(0, 20),
-            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches),
+         if(matches) {
+          let mainContentHTMLText = await htmlService.getMainContentHtml(req, dbSummoner.accountId, version, matches, 0),
             tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
-            
-          let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
-       
+
+          let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, mainContentHTMLText);
+          
           res.render("summoner/result", resData);
 
         } else {
           // save matchlist
-          console.log(colors.cyan(`u need match list of ${dbSummoner.name}`));
- 
           let matchlist = await matchlistService.saveFirstRiotMatchlist(dbSummoner.accountId);
-
           let matches = matchlist.matches,
-            matchesHTMLText = await matchService.getMatchesHTMLText(dbSummoner.accountId, version, matches),
+            mainContentHTMLText = await htmlService.getMainContentHtml(req, dbSummoner.accountId, version, matches, 0),
             tierBoxes = await summonerService.getTierBoxesHTMLText(dbSummoner);
 
-          let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, matchesHTMLText);
+          let resData = summonerService.getSummonerResponse(dbSummoner, tierBoxes, mainContentHTMLText);
           res.render("summoner/result", resData);
-
         }
         
       } else {
@@ -81,15 +78,14 @@ router.get('/userName=:name', (req, res, next) => {
           let summoner = await summonerService.saveRiotSummoner(upperCaseName);
 
           try {
-            //let matchlist = await matchlistService.saveFirstRiotMatchlist(summoner.accountId),
             let matchlist = await matchlistService.saveFirstRiotMatchlist(summoner.accountId),
               version = await staticService.getVersion();
   
             let matches = matchlist.matches,
-              matchesHTMLText = await matchService.getMatchesHTMLText(summoner.accountId, version, matches),
+              mainContentHTMLText = await htmlService.getMainContentHtml(req, dbSummoner.accountId, version, matches, 0),
               tierBoxes = await summonerService.getTierBoxesHTMLText(summoner);
 
-            let resData = summonerService.getSummonerResponse(summoner, tierBoxes, matchesHTMLText);
+            let resData = summonerService.getSummonerResponse(summoner, tierBoxes, mainContentHTMLText);
             res.render("summoner/result", resData);
 
           } catch(err) {
@@ -150,11 +146,11 @@ router.post("/ajax/renew.json/", (req, res) => {
           await matchlistService.renew(riotSummoner.accountId);
           let dbMatchList = await matchlistService.getAllMatchlist(riotSummoner.accountId),
             version = await staticService.getVersion(),
-            matchesHTMLText = await matchService.getMatchesHTMLText(riotSummoner.accountId, version, dbMatchList.matches.slice(0, 20));
-            
+            mainContentHTMLText = await htmlService.getMainContentHtml(req, dbSummoner.accountId, version, dbMatchList.matches.slice(0, 20), 0);
+
           let tierBoxes = summonerService.getTierBoxesHTMLText(riotSummoner);
 
-          res.json({result: 1, tierBoxes: tierBoxes, matchItemList: matchesHTMLText});
+          res.json({result: 1, tierBoxes: tierBoxes, mainContentHTMLText: mainContentHTMLText});
 
         }
         
@@ -183,11 +179,10 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId&
       matches = await matchlistService.get20Matchlist(accountId, startInfo, type);
 
       if(!!matches.length) {
-        let matchesHTMLText = await matchService.getMatchesHTMLText(accountId, version, matches);
-        if(startInfo == 0) {
-          matchesHTMLText += matchService.getMoreMatchBtnHTMLText(accountId);
-        }
-        res.json({result: 1, html: matchesHTMLText});
+  
+        let mainContentHTMLText = await htmlService.getMainContentHtml(req, accountId, version, matches, startInfo);
+
+        res.json({result: 1, html: mainContentHTMLText, totalInfo: req.totalInfo});
       } else {
         res.json({result: 1, html: "<h3>기록된 전적이 없습니다.</h3>"});
       }

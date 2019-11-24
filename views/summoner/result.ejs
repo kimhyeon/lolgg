@@ -6,8 +6,112 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>TEST</title>
   <link rel='stylesheet' href='/stylesheets/common.css'/>
+  <script src="/chartjs/Chart.js"></script>
 </head>
 <body>
+  <script
+  src="https://code.jquery.com/jquery-3.4.1.js"
+  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+  crossorigin="anonymous"></script>
+  <script>
+  // global functions
+  const lolgg = (() => {
+    
+    window.averageData = {
+      wins: 0,
+      losses: 0,
+      kills: 0,
+      deaths: 0,
+      assists: 0,
+      teamTotalKills: 0,
+    }
+
+    return {
+      test:(accountId) => {
+        // let button = e.target.closest("div");
+        let gameItemLists = document.querySelectorAll(".gameItemList"),
+        lastGameId = gameItemLists[gameItemLists.length - 1].dataset.lastGameid;
+
+        console.warn(accountId, lastGameId);
+      },
+      matchMoreButton: (accountId) => {
+        let gameItemLists = document.querySelectorAll(".gameItemList"),
+          lastGameId = gameItemLists[gameItemLists.length - 1].dataset.lastGameid,
+          button = document.getElementById("matchMoreButton");
+
+        let type = document.querySelector(".list__item.list__item--active").dataset.type;
+        type = (type === "etc") ? document.querySelector(".list__item-queue-select").value : type;
+        console.log(accountId, lastGameId, type);
+
+        let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
+        fetch(url, {
+          method: 'get',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        })
+        .then((res) => {
+          return res.json();
+        })
+        .then((json) => {
+          button.insertAdjacentHTML("beforebegin", json.html);
+
+          lolgg.updateMatchGraph(json.totalInfo);
+          // container.insertAdjacentHTML("beforeend", json.html);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      },
+      updateMatchGraph:(data) => {
+        averageData.wins += data.wins;
+        averageData.losses += data.losses;
+        averageData.kills += data.kills;
+        averageData.deaths += data.deaths;
+        averageData.assists += data.assists;
+        averageData.teamTotalKills += data.teamTotalKills;
+        
+        console.warn("##", averageData);
+
+        var ctx = document.getElementById('matchGraph').getContext('2d');
+        var myDoughnutChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+              //labels: ["패", "승"],
+              datasets: [{
+                data: [averageData.losses, averageData.wins],
+                backgroundColor: [
+                  "rgba(227, 84, 83, 1)",
+                  "rgba(59, 145, 204, 1)"
+                ],
+                borderColor: [
+                  "#EDEDED",
+                  "#EDEDED"
+                ]
+              }]
+            },
+            options: {
+              cutoutPercentage: 65,
+              radiusBackground: {
+                color: '#EDEDED'
+              },
+              animation: {
+                animateRotate: false
+              },
+              tooltips: {enabled: false},
+              hover: {mode: null},
+              title: {display: false,},
+              legend: {display: false,},
+            }
+        });
+        
+
+      }
+    }
+
+  })();  
+  </script>
   <div class="b-wrap">
     <%- include('../component/gnb.ejs') %>
     <%- include('../component/menu.ejs', {searchForm: searchForm}) %>
@@ -62,6 +166,8 @@
                 <%- tierBoxes %>
 
             </div>
+
+
             <div class="main-content" data-account-id="<%= summoner.accountId %>">
               <!-- //navigation start -->
               <div class="navigation box">
@@ -90,70 +196,9 @@
 
               <!-- //main-content__body start-->
               <div class="main-content__body">
-                <!-- //average-stats start -->
-                <div class="average-stats">
-                  <div class="match">
-                    <div class="match__stats">20전 9승 10패</div>
-                    <div class="match__graph">
-                      <div id=matchGraph>
-                        Graph HERE
-                      </div>
-                    </div>
-                    <div class="match__KDA">
-                      <div class="KDA">5.4 / 5.0 / 7.9</div>
-                      <div class="KDARatio">
-                        <span>2.65:1</span> 
-                        <span>(44%)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- //average-stats end -->
 
-                <div class="gameItemLists-container">
-                  <%- matchItemList %>
-                </div>
-             
-                <div id="matchMoreButton" class="matchMoreButton box" data-account-id="<%= summoner.accountId %>">
-                  <a href="javascript:void(0)" class="button">더 보기</a>
-                </div>
-                <script>
-
-                  // 더보기 버튼
-                  (() => {
-                    document.getElementById("matchMoreButton").addEventListener("click", (e) => {
-                      let button = e.target.closest("div"),
-                        accountId = button.dataset.accountId;
-                        container = document.querySelector(".gameItemLists-container"),
-                        lastGameId = document.querySelector(".gameItemLists-container > .gameItemList:last-child").dataset.lastGameid;
-                      
-                      let type = document.querySelector(".list__item.list__item--active").dataset.type;
-                      type = (type === "etc") ? document.querySelector(".list__item-queue-select").value : type;
-                      console.log(accountId, lastGameId, type);
-              
-                      let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
-                      fetch(url, {
-                        method: 'get',
-                        headers: {
-                          'Accept': 'application/json',
-                          'Content-Type': 'application/json'
-                        },
-                      })
-                      .then((res) => {
-                        return res.json();
-                      })
-                      .then((json) => {
-                        container.insertAdjacentHTML("beforeend", json.html);
-                      })
-                      .catch((err) => {
-                        console.error(err);
-                      });
-
-
-                    });
-
-                  })();
-                </script>
+                  <%- mainContentHTMLText %>
+          
               </div>
               <!-- //main-content__body end-->
 
@@ -234,10 +279,9 @@
       }
       activeTab.classList.add("list__item--active");
       
-
-
-      getGameList(queueType);
-
+      if (queueType !== undefined) {
+        getGameList(queueType);
+      }
     }
   }
   
@@ -282,18 +326,20 @@
         
       }
 
-      if(json.matchItemList) {
-
-        let container = document.querySelector(".gameItemLists-container"),
-        oldGameItemLists = document.querySelectorAll(".gameItemList");
-        
-        // remove gameItemList
-        for(let i = 0; i < oldGameItemLists.length; i++) {
-          container.removeChild(oldGameItemLists[i]);
+      if(json.mainContentHTMLText) {
+        let nodes = document.querySelectorAll(".main-content__body > *");
+        for(let i = 0; i < nodes.length; i++) {
+          nodes[i].remove();
         }
-
-        // add gameItemList
-        container.insertAdjacentHTML("afterbegin", json.matchItemList);
+        let container = document.querySelector(".main-content__body");
+        container.insertAdjacentHTML("afterbegin", json.mainContentHTMLText);
+        
+        // set total tab !
+        let tabs = document.querySelectorAll(".navigation .list .list__item");
+        for(let i = 0; i < tabs.length; i++) {
+          tabs[i].classList.remove("list__item--active");
+        }
+        tabs[0].classList.add("list__item--active");
 
       }
 
@@ -305,6 +351,41 @@
   });
 
 })();
+
+// 더 보기 버튼
+// (() => {
+//   document.getElementById("matchMoreButton").addEventListener("click", (e) => {
+//     let button = e.target.closest("div"),
+//       accountId = button.dataset.accountId;
+//       container = document.querySelector(".gameItemLists-container"),
+//       lastGameId = document.querySelector(".gameItemLists-container > .gameItemList:last-child").dataset.lastGameid;
+    
+//     let type = document.querySelector(".list__item.list__item--active").dataset.type;
+//     type = (type === "etc") ? document.querySelector(".list__item-queue-select").value : type;
+//     console.log(accountId, lastGameId, type);
+
+//     let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
+//     fetch(url, {
+//       method: 'get',
+//       headers: {
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/json'
+//       },
+//     })
+//     .then((res) => {
+//       return res.json();
+//     })
+//     .then((json) => {
+//       container.insertAdjacentHTML("beforeend", json.html);
+//     })
+//     .catch((err) => {
+//       console.error(err);
+//     });
+
+
+//   });
+
+// })();
 
 </script>
 

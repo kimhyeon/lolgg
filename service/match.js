@@ -5,7 +5,7 @@ const matchDAO = require('../persistent/match');
 const staticDAO = require('../persistent/static');
 
 // test sync await,
-exports.getMatchesHTMLText = (accountId, version, matchlist) => {
+exports.getMatchesHTMLText = (req, accountId, version, matchlist) => {
   return new Promise((resolve, reject) => {
 
     (async () => {
@@ -35,7 +35,7 @@ exports.getMatchesHTMLText = (accountId, version, matchlist) => {
         // working here !!!!
 
         console.log(colors.cyan(`${accountId} ${version} ${matches.length} ${matchlist.length}`))
-        resolve(getHTMLText(accountId, version, matches, lolggChampion.data));
+        resolve(getHTMLText(req, accountId, version, matches, lolggChampion.data));
 
       } catch(err) {
         reject(err);
@@ -46,7 +46,7 @@ exports.getMatchesHTMLText = (accountId, version, matchlist) => {
 
 }
 
-let getHTMLText = (accountId, version, matches, lolggChampion) => {
+let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
  
   let gamesData = getGamesData(accountId, version, matches, lolggChampion);
   
@@ -145,7 +145,6 @@ let getHTMLText = (accountId, version, matches, lolggChampion) => {
     gameItem += stats;
     // stats
 
-
     // items
     let items = tag("div", {class: "items"}, false);
 
@@ -236,14 +235,46 @@ let getHTMLText = (accountId, version, matches, lolggChampion) => {
   let lastGameId = gamesData[gamesData.length - 1].gameId, 
     gameItemList = tag("div", {"class": "gameItemList", "data-last-gameid": String(lastGameId)}, false);
   
+  
+  // get total game infos 
+  let totalInfo = {
+    wins: 0,
+    losses: 0,
+    kills: 0,
+    deaths: 0,
+    assists: 0,
+    teamTotalKills: 0,
+  }
+
   gamesData.forEach((game) => {
     gameItemList += gameItemHTMLText(game);
+
+    // set total game Info for top data
+    if(game.win !== "다시하기") {
+      totalInfo.wins = (game.win === "승리") ? totalInfo.wins + 1 : totalInfo.wins;
+      totalInfo.losses = (game.win === "패배") ? totalInfo.losses + 1 : totalInfo.losses;
+
+      totalInfo.kills += game.kills;
+      totalInfo.deaths += game.deaths;
+      totalInfo.assists += game.assists;
+      totalInfo.teamTotalKills += game.teamTotalKills;
+    }
+    
   });
 
   gameItemList += "</div>";
 
-  // console.log(tag('a', {href: 'https://sellside.com'}, accountId));
-  // console.log(colors.cyan(gameItemList));
+  // add data - script
+  gameItemList += `<script>
+    $(function() {
+    lolgg.updateMatchGraph({wins: ${totalInfo.wins},losses: ${totalInfo.losses},kills: ${totalInfo.kills},
+    deaths: ${totalInfo.deaths},assists: ${totalInfo.assists},teamTotalKills: ${totalInfo.teamTotalKills}});
+    console.log("###"); 
+    });
+  </script>`;
+
+  req.totalInfo = totalInfo;
+
   return gameItemList;
     
 }
@@ -288,6 +319,15 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     let min = parseInt(duration / 60);
     let sec = parseInt(duration % 60);
     return `${min}분 ${sec}초`;
+  }
+  
+  let getTeamTotalKills = (teamParticipant) => {
+    let killSums = 0;
+    for(let i in teamParticipant) {
+      let participant = teamParticipant[i];
+      killSums += participant.stats.kills;
+    }
+    return killSums;
   }
   
   let getKillRate = (participant, teamParticipant) => {
@@ -391,7 +431,6 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["queueName"] = queueName[match.queueId];
     obj["gameCreation"] = getDaysAgoText(match.gameCreation, match.gameDuration);
     
-    //obj["win"] = participant.stats.win ? "승리" : "패배";
     obj["win"] = getGameResult(participant.stats.win, match.gameDuration);
     obj["duration"] = match.gameDuration;
 
@@ -418,6 +457,8 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["totalMinionsKilled"] = participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled + " CS";
     obj["killRate"] = getKillRate(participant, teamParticipant) + "%";
 
+    obj["teamTotalKills"] = getTeamTotalKills(teamParticipant);
+    
     obj["item0"] = participant.stats.item0;
     obj["item0_imgUrl"] = getItemImgUrl(participant.stats.item0);
     obj["item1"] = participant.stats.item1;
@@ -449,8 +490,28 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
 
 exports.getMoreMatchBtnHTMLText = (accountId) => {
   return `
-    <div id="matchMoreButton" class="matchMoreButton box" data-account-id="${accountId}">
+    <div id="matchMoreButton" class="matchMoreButton box" data-account-id="${accountId}" onclick="lolgg.matchMoreButton('${accountId}'); return false;">
       <a href="javascript:void(0)" class="button">더 보기</a>
     </div>
   `
+}
+
+exports.getAverageStatHTMLText = () => {
+  return `<div class="average-stats">
+    <div class="match">
+      <div class="match__stats">20전 9승 10패</div>
+      <div class="match__graph">
+        <div>
+          <canvas id="matchGraph" style="width:90px;height:90px;">  
+        </div>
+      </div>
+      <div class="match__KDA">
+        <div class="KDA">5.4 / 5.0 / 7.9</div>
+        <div class="KDARatio">
+          <span>2.65:1</span> 
+          <span>(44%)</span>
+        </div>
+      </div>
+    </div>
+  </div>`
 }
