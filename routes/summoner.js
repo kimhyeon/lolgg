@@ -181,10 +181,10 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId&
       if(!!matches.length) {
   
         let mainContentHTMLText = await htmlService.getMainContentHtml(req, accountId, version, matches, startInfo);
-
-        res.json({result: 1, html: mainContentHTMLText, totalInfo: req.totalInfo});
+        
+        res.json({result: 1, data:true, html: mainContentHTMLText, totalInfo: req.totalInfo});
       } else {
-        res.json({result: 1, html: "<h3>기록된 전적이 없습니다.</h3>"});
+        res.json({result: 1, data:false, html: htmlService.getNoMatchlistHTML()});
       }
 
   })();

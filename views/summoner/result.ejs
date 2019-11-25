@@ -9,10 +9,6 @@
   <script src="/chartjs/Chart.js"></script>
 </head>
 <body>
-  <script
-  src="https://code.jquery.com/jquery-3.4.1.js"
-  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-  crossorigin="anonymous"></script>
   <script>
   // global functions
   const lolgg = (() => {
@@ -25,6 +21,8 @@
       assists: 0,
       teamTotalKills: 0,
     }
+
+    let matchGraph = null;
 
     return {
       test:(accountId) => {
@@ -55,30 +53,31 @@
           return res.json();
         })
         .then((json) => {
-          button.insertAdjacentHTML("beforebegin", json.html);
 
-          lolgg.updateMatchGraph(json.totalInfo);
-          // container.insertAdjacentHTML("beforeend", json.html);
+          button.insertAdjacentHTML("beforebegin", json.html);
+          if(json.data === true) {
+            lolgg.updateMatchGraphAndStats(json.totalInfo);
+          } else {
+            document.getElementById("matchMoreButton").remove();
+          }
+
         })
         .catch((err) => {
           console.error(err);
         });
       },
-      updateMatchGraph:(data) => {
-        averageData.wins += data.wins;
-        averageData.losses += data.losses;
-        averageData.kills += data.kills;
-        averageData.deaths += data.deaths;
-        averageData.assists += data.assists;
-        averageData.teamTotalKills += data.teamTotalKills;
-        
-        console.warn("##", averageData);
+      initMatchGraph: (data) => {
+        averageData.wins = data.wins;
+        averageData.losses = data.losses;
+        averageData.kills = data.kills;
+        averageData.deaths = data.deaths;
+        averageData.assists = data.assists;
+        averageData.teamTotalKills = data.teamTotalKills;
 
-        var ctx = document.getElementById('matchGraph').getContext('2d');
-        var myDoughnutChart = new Chart(ctx, {
+        let ctx = document.getElementById('matchGraph').getContext('2d');
+        matchGraph = new Chart(ctx, {
             type: 'pie',
             data: {
-              //labels: ["패", "승"],
               datasets: [{
                 data: [averageData.losses, averageData.wins],
                 backgroundColor: [
@@ -106,6 +105,48 @@
             }
         });
         
+      },
+      updateMatchGraphAndStats: (data) => {
+        averageData.wins += data.wins;
+        averageData.losses += data.losses;
+        averageData.kills += data.kills;
+        averageData.deaths += data.deaths;
+        averageData.assists += data.assists;
+        averageData.teamTotalKills += data.teamTotalKills;
+
+        // update graph
+        matchGraph.data.datasets[0].data = [averageData.losses, averageData.wins];
+        matchGraph.update();
+
+        // update stats
+        let totalGames = averageData.wins + averageData.losses,
+          winRate = (averageData.wins / totalGames * 100).toFixed(0),
+          killRate = ((averageData.kills + averageData.assists) / averageData.teamTotalKills * 100).toFixed(0);
+
+          let getKDARatio = (kills, deaths, assists) => {
+          if(deaths === 0) {
+            if(kills ===0 && assists === 0 ) {
+              return "0.00:1";
+            } else {
+              return "Perfect";
+            }
+          } else {
+            return ((kills + assists) / deaths).toFixed(2) + ":1";
+          }
+        }
+
+        let KDARatio = getKDARatio(averageData.kills, averageData.deaths, averageData.assists),
+          match_stat = `${totalGames}전 ${averageData.wins}승 ${averageData.losses}패`;
+
+        document.querySelector(".average-stats .match__stats").textContent = match_stat;
+        document.querySelector(".average-stats .winRate").textContent = `${winRate}%`;
+
+        document.querySelector(".match__KDA .kill").textContent = (averageData.kills / totalGames).toFixed(1);
+        document.querySelector(".match__KDA .death").textContent = (averageData.deaths / totalGames).toFixed(1);
+        document.querySelector(".match__KDA .assist").textContent = (averageData.assists / totalGames).toFixed(1);
+
+        document.querySelector(".KDARatioAndKillRate .KDARatio").textContent = KDARatio;
+        document.querySelector(".KDARatioAndKillRate .killRate").textContent = `(${killRate}%)`;
 
       }
     }
@@ -167,7 +208,6 @@
 
             </div>
 
-
             <div class="main-content" data-account-id="<%= summoner.accountId %>">
               <!-- //navigation start -->
               <div class="navigation box">
@@ -197,8 +237,15 @@
               <!-- //main-content__body start-->
               <div class="main-content__body">
 
-                  <%- mainContentHTMLText %>
-          
+                <%- mainContentHTMLText %>
+                
+                <!-- <div class="box errorBox">
+                  <img class="errorIcon" src="/images/bg-noData.png">
+                  <div class="errorMessage">
+                    <div>기록된 전적이 없습니다.</div>
+                  </div>
+                </div> -->
+
               </div>
               <!-- //main-content__body end-->
 
@@ -209,8 +256,6 @@
         <!-- //cntent-wrap end-->
       </div>
     </div>
-
-    <hr>
 
   </div>
 
@@ -250,6 +295,10 @@
 
       // add gameItemList
       container.insertAdjacentHTML("afterbegin", json.html);
+      
+      if(json.data) {
+        lolgg.initMatchGraph(json.totalInfo);
+      }
 
     })
     .catch((err) => {
@@ -351,41 +400,6 @@
   });
 
 })();
-
-// 더 보기 버튼
-// (() => {
-//   document.getElementById("matchMoreButton").addEventListener("click", (e) => {
-//     let button = e.target.closest("div"),
-//       accountId = button.dataset.accountId;
-//       container = document.querySelector(".gameItemLists-container"),
-//       lastGameId = document.querySelector(".gameItemLists-container > .gameItemList:last-child").dataset.lastGameid;
-    
-//     let type = document.querySelector(".list__item.list__item--active").dataset.type;
-//     type = (type === "etc") ? document.querySelector(".list__item-queue-select").value : type;
-//     console.log(accountId, lastGameId, type);
-
-//     let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
-//     fetch(url, {
-//       method: 'get',
-//       headers: {
-//         'Accept': 'application/json',
-//         'Content-Type': 'application/json'
-//       },
-//     })
-//     .then((res) => {
-//       return res.json();
-//     })
-//     .then((json) => {
-//       container.insertAdjacentHTML("beforeend", json.html);
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//     });
-
-
-//   });
-
-// })();
 
 </script>
 

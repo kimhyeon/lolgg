@@ -266,11 +266,11 @@ let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
 
   // add data - script
   gameItemList += `<script>
-    $(function() {
-    lolgg.updateMatchGraph({wins: ${totalInfo.wins},losses: ${totalInfo.losses},kills: ${totalInfo.kills},
+    (() => {
+    lolgg.initMatchGraph({wins: ${totalInfo.wins},losses: ${totalInfo.losses},kills: ${totalInfo.kills},
     deaths: ${totalInfo.deaths},assists: ${totalInfo.assists},teamTotalKills: ${totalInfo.teamTotalKills}});
     console.log("###"); 
-    });
+    })();
   </script>`;
 
   req.totalInfo = totalInfo;
@@ -482,7 +482,8 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
 
   });
 
-  console.log(list);
+  // game list
+  // console.log(list);
 
   return list
 
@@ -496,20 +497,46 @@ exports.getMoreMatchBtnHTMLText = (accountId) => {
   `
 }
 
-exports.getAverageStatHTMLText = () => {
+exports.getAverageStatHTMLText = (total) => {
+
+  let totalGames = total.wins + total.losses,
+    winRate = (total.wins / totalGames * 100).toFixed(0),
+    killRate = ((total.kills + total.assists) / total.teamTotalKills * 100).toFixed(0);
+
+  let getKDARatio = (kills, deaths, assists) => {
+    if(deaths === 0) {
+      if(kills ===0 && assists === 0 ) {
+        return "0.00:1";
+      } else {
+        return "Perfect";
+      }
+    } else {
+      return ((kills + assists) / deaths).toFixed(2) + ":1";
+    }
+  }
+
+  let KDARatio = getKDARatio(total.kills, total.deaths, total.assists);
+
+  console.log(total);
+
   return `<div class="average-stats">
     <div class="match">
-      <div class="match__stats">20전 9승 10패</div>
+      <div class="match__stats">${total.wins + total.losses}전 ${total.wins}승 ${total.losses}패</div>
       <div class="match__graph">
-        <div>
-          <canvas id="matchGraph" style="width:90px;height:90px;">  
+        <div class="canvas">
+          <div class="winRate">${winRate}%</div>
+          <canvas id="matchGraph" style="width:90px;height:90px;"></canvas>
         </div>
       </div>
       <div class="match__KDA">
-        <div class="KDA">5.4 / 5.0 / 7.9</div>
-        <div class="KDARatio">
-          <span>2.65:1</span> 
-          <span>(44%)</span>
+        <div class="KDA">
+          <span class="kill">${(total.kills / totalGames).toFixed(1)}</span> / 
+          <span class="death">${(total.deaths / totalGames).toFixed(1)}</span> / 
+          <span class="assist">${(total.assists / totalGames).toFixed(1)}</span>
+        </div>
+        <div class="KDARatioAndKillRate">
+          <span class="KDARatio">${KDARatio}</span> 
+          <span class="killRate">(${killRate}%)</span>
         </div>
       </div>
     </div>
