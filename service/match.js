@@ -53,15 +53,18 @@ let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
   let gameItemHTMLText = (game) => {
     
     let gameItem = null;
-
     
     if(game.duration < 300) {
-      gameItem = tag("div", {class: "gameItem regame"}, false);
+      gameItem = tag("div", {class: "gameItem regame", "data-game-id": String(game.gameId)}, false);
     } else if(game.win === "승리") {
-      gameItem = tag("div", {class: "gameItem win"}, false);
+      gameItem = tag("div", {class: "gameItem win", "data-game-id": String(game.gameId)}, false);
     } else {
-      gameItem = tag("div", {class: "gameItem lose"}, false);
+      gameItem = tag("div", {class: "gameItem lose", "data-game-id": String(game.gameId)}, false);
     }
+
+    // content start
+    gameItem += tag("div", {class: "content"}, false);
+
     // game stats
     let gameStats = tag("div", {class: "gameStats"}, false);
     gameStats += tag("div", {class: "gameType"}, game.queueName);
@@ -225,8 +228,29 @@ let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
     players += anemy;
 
     players += "</div>";
-    gameItem += players;
     // players
+
+    gameItem += players;
+    
+    // game detail button
+    let detailButton = `
+      <div class="statsButton">
+        <div class="content">
+          <a class="button matchDetail" onclick="lolgg.matchDetailButton(this, '${game.gameId}');">
+            <i class="icon open fas fa-chevron-down"></i>
+            <i class="icon close fas fa-chevron-up"></i>
+          </a>
+        </div>
+      </div>
+    `;
+    // game detail button
+    gameItem += detailButton;
+
+    gameItem += "</div>";
+     // content end
+
+    // empty detail
+    gameItem += tag("div", {class: "gameDetail"});
 
     return gameItem += "</div>";
 

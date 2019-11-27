@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>TEST</title>
   <link rel='stylesheet' href='/stylesheets/common.css'/>
-  <script src="/chartjs/Chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" />  <script src="/chartjs/Chart.js"></script>
 </head>
 <body>
   <script>
@@ -41,7 +41,7 @@
         type = (type === "etc") ? document.querySelector(".list__item-queue-select").value : type;
         console.log(accountId, lastGameId, type);
 
-        let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
+        let url = `/summoner/ajax/averageAndList/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
         fetch(url, {
           method: 'get',
           headers: {
@@ -147,6 +147,51 @@
 
         document.querySelector(".KDARatioAndKillRate .KDARatio").textContent = KDARatio;
         document.querySelector(".KDARatioAndKillRate .killRate").textContent = `(${killRate}%)`;
+
+      },
+      matchDetailButton: (event, gameId) => {
+   
+        let classList = event.classList,
+          openIcon = event.querySelector(".icon.open"),
+          closeIcon = event.querySelector(".icon.close"),
+          gameItem = document.querySelector(`.gameItem[data-game-id='${gameId}'`),
+          gameDetail = gameItem.querySelector(".gameDetail");
+
+        if(Array.from(classList).indexOf("open") !== -1) {
+          // remove detail tags
+          classList.remove("open");
+          openIcon.style.display = "block";
+          closeIcon.style.display = "none";
+
+          gameDetail.innerHTML = "";
+
+        } else {
+          let url = `/summoner/ajax/detail/gameId=${gameId}`;
+          fetch(url, {
+            method: 'get',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+          })
+          .then((res) => {
+            return res.json();
+          })
+          .then((json) => {
+            
+            classList.add("open");
+            openIcon.style.display = "none";
+            closeIcon.style.display = "block";
+
+            gameDetail.insertAdjacentHTML("afterbegin", json.html);
+
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+
+        
+        }
 
       }
     }
@@ -272,7 +317,7 @@
       
     lastGameId = (lastGameId) ? lastGameId : 0;
 
-    let url = `/summoner/ajax/averageAndList.json/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
+    let url = `/summoner/ajax/averageAndList/startInfo=${lastGameId}&accountId=${accountId}&type=${type}`;
     fetch(url, {
       method: 'get',
       headers: {

@@ -129,7 +129,7 @@ router.post("/ajax/renew.json/", (req, res) => {
     try {
       let dbSummoner = await summonerDAO.findOne({ id: req.body.summonerId });
       if(dbSummoner) {
-       
+        
         let riotSummoner = await riotAPI.getSummonerByEncryptedAccountId(dbSummoner.accountId);
         if(riotSummoner) {
           
@@ -168,7 +168,7 @@ router.post("/ajax/renew.json/", (req, res) => {
 
 });
 
-router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId&type=:type", (req, res) => {
+router.get("/ajax/averageAndList/startInfo=:startInfo&accountId=:accountId&type=:type", (req, res) => {
   let startInfo = req.params.startInfo,
     accountId = req.params.accountId,
     type = req.params.type;
@@ -189,5 +189,13 @@ router.get("/ajax/averageAndList.json/startInfo=:startInfo&accountId=:accountId&
 
   })();
 });
+
+router.get("/ajax/detail/gameId=:gameId", (req, res) => {
+
+  let gameId = req.params.gameId;
+  res.json({result: 1, html: `<h3>game id  : ${gameId}</h3>`})
+
+});
+
 
 module.exports = router;

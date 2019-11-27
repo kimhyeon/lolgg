@@ -109,13 +109,14 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItemList .gameItem.win{margin-bottom:8px;position:relative;background-color: #a3cfec;border:1px solid #99b9cf;}
 .gameItemList .gameItem.lose{margin-bottom:8px;position:relative;background-color: #e2b6b3;border:1px solid #cea7a7;}
 .gameItemList .gameItem.regame{margin-bottom:8px;position:relative;background-color: #b6b6b6;border:1px solid #a7a7a7;}
-.gameItem > div{display:table-cell;vertical-align:middle;height:96px;}
+.gameItem > .content{position:relative;}
+.gameItem > .content > div{display:table-cell;vertical-align:middle;height:96px;}
 .gameItem .gameStats{width:70px;text-align:center;font-size:11px;color:#555;line-height:16px;}
 .gameItem .gameStats .bar{display:block;width:27px;margin:5px auto;height:2px;background-color:#cdd2d2;}
 .gameItem.win .gameStats .bar{background-color:#99b9cf;}
 .gameItem.lose .gameStats .bar{background-color:#cea7a7;}
 .gameItem.regame .gameStats .bar{background-color:#a7a7a7;}
-.gameItem .gameStats .gameResult{font-weight:bold;}
+.gameItem .gameStats .gameResult{font-weight:bold;}down-errow
 .gameItem.win .gameStats .gameResult{color:#1a78ae;}
 .gameItem.lose .gameStats .gameResult{color:#c6443e;}
 .gameItem.regame .gameStats .gameResult{color:#000;}
@@ -133,7 +134,7 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItem .score .KDARatio .KDARatio{color:#353a3a;}
 .gameItem .stats{width:90px;font-size:11px;text-align:center;line-height:18px;color:#555e5e;}
 .gameItem .stats .killRate{color:#c6443e;}
-.gameItem .items{font-size:0;}
+.gameItem .items{font-size:0;width:115px;}
 .gameItem .items .itemList{width:96px;margin:0 auto;}
 .gameItem .items .itemList .item{display:inline-block;width:22px;height:22px;border-radius:3px;margin-top:2px;margin-right:2px;overflow:hidden;}
 .gameItem.win .items .itemList .item{background-color:#99b9cf;}
@@ -149,6 +150,19 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .gameItem .players .team .summoner .championImage img{width:16px;height:16px;}
 .gameItem .players .team .summoner .summonerName{display:inline-block;max-width:60px;vertical-align:middle;font-size:11px;color:#555;}
 .gameItem .players .team .summoner .summonerName a{display:block;color:inherit;text-decoration:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}
+.gameItem .statsButton{width:30px;border:1px solid #000;position: absolute;right: -1px;top: -1px;display: block;height:100%;height: 96px;}
+.gameItem.win .statsButton{border-color: #4aa1d2;background: #64b1e4;}
+.gameItem.lose .statsButton{border-color: #d67b77;background: #e89d99;}
+.gameItem.regame .statsButton{border-color: #999;background: #a7a7a7;}
+.gameItem .statsButton .content{width:100%;height:100%;}
+.gameItem .statsButton .button.matchDetail{width:100%;height:100%;display:block;cursor:pointer;}
+.gameItem .statsButton .icon{width: 100%;text-align: center;font-size: 17px;position: absolute;bottom: 5px;}
+.gameItem .statsButton .icon.close{display:none;}
+.gameItem.win .icon{color:#236BA4}
+.gameItem.lose .icon{color:#BC3E3F}
+.gameItem.regame .icon{color:#555555}
+
+.gameItem .gameDetail{background-color:#FFF;border-top:1px solid #cdd2d2;}
 
 .matchMoreButton a.button{display:block;height:50px;color:#555e5e;font-size:13px;line-height:50px;text-align:center;text-decoration:none;outline:none;}
 .errorBox{position: relative;}
