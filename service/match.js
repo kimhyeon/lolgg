@@ -33,8 +33,7 @@ exports.getMatchesHTMLText = (req, accountId, version, matchlist) => {
         }
         
         // working here !!!!
-
-        console.log(colors.cyan(`${accountId} ${version} ${matches.length} ${matchlist.length}`))
+        // console.log(colors.cyan(`${accountId} ${version} ${matches.length} ${matchlist.length}`))
         resolve(getHTMLText(req, accountId, version, matches, lolggChampion.data));
 
       } catch(err) {
@@ -46,8 +45,59 @@ exports.getMatchesHTMLText = (req, accountId, version, matchlist) => {
 
 }
 
+let getChampionImgUrl = (version, championId) => {
+  return `http://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${championId}.png`;
+}
+
+let getItemImgUrl = (version, item) => {
+  if(item !== 0) {
+    return `http://ddragon.leagueoflegends.com/cdn/${version}/img/item/${item}.png`;
+  } else {
+    return "noItem"
+  }
+}
+
+let getItemTag = (item, itemUrl) => {
+  if(item != 0) {
+    return tag("div", {class: "item"}, false) + tag("img", {src: itemUrl, class: "image"}) + "</div>";
+  } else {
+    return tag("div", {class: "item"}, false) + tag("div", {class: "image noitem"}) + "</div>";
+  }
+}
+
+let calc = {
+  getKillRate: (participant, teamParticipant) => {
+    let killSums = 0;
+    for(let i in teamParticipant) {
+      let participant = teamParticipant[i];
+      killSums += participant.stats.kills;
+    }
+    if(killSums === 0) {
+      return "0";
+    } else {
+      return (((participant.stats.kills + participant.stats.assists) / killSums) * 100).toFixed(0); 
+    }
+  },
+  getKDARatio: (kills, deaths, assists) => {
+    if(deaths === 0) {
+      if(kills ===0 && assists === 0 ) {
+        return "0.00:1";
+      } else {
+        return "Perfect";
+      }
+    } else {
+      return ((kills + assists) / deaths).toFixed(2) + ":1";
+    }
+  },
+  getMinionKilledPerMinute: (duration, minionTotal) => {
+    let min = parseInt(duration / 60);
+
+    return (minionTotal / min).toFixed(1);
+  }
+}
+
 let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
- 
+
   let gamesData = getGamesData(accountId, version, matches, lolggChampion);
   
   let gameItemHTMLText = (game) => {
@@ -153,14 +203,6 @@ let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
 
     let itemList = tag("div", {class: "itemList"}, false)
     
-    let getItemTag = (item, itemUrl) => {
-      if(item != 0) {
-        return tag("div", {class: "item"}, false) + tag("img", {src: itemUrl, class: "image"}) + "</div>";
-      } else {
-        return tag("div", {class: "item"}, false) + tag("div", {class: "image noitem"}) + "</div>";
-      }
-    }
-
     itemList += getItemTag(game.item0, game.item0_imgUrl);
     itemList += getItemTag(game.item1, game.item1_imgUrl);
     itemList += getItemTag(game.item2, game.item2_imgUrl);
@@ -354,38 +396,7 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     return killSums;
   }
   
-  let getKillRate = (participant, teamParticipant) => {
-    let killSums = 0;
-    for(let i in teamParticipant) {
-      let participant = teamParticipant[i];
-      killSums += participant.stats.kills;
-    }
-    if(killSums === 0) {
-      return "0";
-    } else {
-      return (((participant.stats.kills + participant.stats.assists) / killSums) * 100).toFixed(0); 
-    }
-  }
 
-  let getKDARatio = (kills, deaths, assists) => {
-    if(deaths === 0) {
-      if(kills ===0 && assists === 0 ) {
-        return "0.00:1";
-      } else {
-        return "Perfect";
-      }
-    } else {
-      return ((kills + assists) / deaths).toFixed(2) + ":1";
-    }
-  } 
-
-  let getChampionImgUrl = (championId) => {
-    return `http://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${championId}.png`;
-  }
-
-  let getItemImgUrl = (item) => {
-    return `http://ddragon.leagueoflegends.com/cdn/${version}/img/item/${item}.png`;
-  }
 
   // let getSummonerSpellImgUrl = (spell) => {
   //   return `https://opgg-static.akamaized.net/images/lol/spell/SummonerFlash.png?image=w_22&v=15354684000`;
@@ -397,7 +408,7 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     participants.forEach((participant) => {
       let obj = {};
       obj["championId"] = participant.championId;
-      obj["championId_imgUrl"] = getChampionImgUrl(lolggChampion[participant.championId].id);
+      obj["championId_imgUrl"] = getChampionImgUrl(version, lolggChampion[participant.championId].id);
 
       let participantIdentity = match.participantIdentities.find((data) => {
         return participant.participantId === data.participantId;
@@ -462,7 +473,7 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
 
     obj["championName"] = lolggChampion[participant.championId].name;
     obj["championId"] = lolggChampion[participant.championId].id;
-    obj["championId_imgUrl"] = getChampionImgUrl(lolggChampion[participant.championId].id);
+    obj["championId_imgUrl"] = getChampionImgUrl(version, lolggChampion[participant.championId].id);
     
     obj["spell1Id"] = participant.spell1Id;
     obj["spell2Id"] = participant.spell2Id;
@@ -473,30 +484,29 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["deaths"] = participant.stats.deaths;
     obj["assists"] = participant.stats.assists;
 
-
-    // obj["KDARatio"] = ((obj["kills"] + obj["assists"]) / obj["deaths"]).toFixed(2) + ":1";
-    obj["KDARatio"] = getKDARatio(obj["kills"], obj["deaths"], obj["assists"]);
+    obj["KDARatio"] = calc.getKDARatio(obj["kills"], obj["deaths"], obj["assists"]);
       
     obj["champLevel"] = participant.stats.champLevel;
     obj["totalMinionsKilled"] = participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled + " CS";
-    obj["killRate"] = getKillRate(participant, teamParticipant) + "%";
+    obj["killRate"] = calc.getKillRate(participant, teamParticipant) + "%";
 
     obj["teamTotalKills"] = getTeamTotalKills(teamParticipant);
     
     obj["item0"] = participant.stats.item0;
-    obj["item0_imgUrl"] = getItemImgUrl(participant.stats.item0);
+    obj["item0_imgUrl"] = getItemImgUrl(version, participant.stats.item0);
     obj["item1"] = participant.stats.item1;
-    obj["item1_imgUrl"] = getItemImgUrl(participant.stats.item1);
+    obj["item1_imgUrl"] = getItemImgUrl(version, participant.stats.item1);
     obj["item2"] = participant.stats.item2;
-    obj["item2_imgUrl"] = getItemImgUrl(participant.stats.item2);
+    obj["item2_imgUrl"] = getItemImgUrl(version, participant.stats.item2);
     obj["item3"] = participant.stats.item3;
-    obj["item3_imgUrl"] = getItemImgUrl(participant.stats.item3);
+    obj["item3_imgUrl"] = getItemImgUrl(version, participant.stats.item3);
     obj["item4"] = participant.stats.item4;
-    obj["item4_imgUrl"] = getItemImgUrl(participant.stats.item4);
+    obj["item4_imgUrl"] = getItemImgUrl(version, participant.stats.item4);
     obj["item5"] = participant.stats.item5;
-    obj["item5_imgUrl"] = getItemImgUrl(participant.stats.item5);
+    obj["item5_imgUrl"] = getItemImgUrl(version, participant.stats.item5);
     obj["item6"] = participant.stats.item6; // lenze
-    obj["item6_imgUrl"] = getItemImgUrl(participant.stats.item6);
+    obj["item6_imgUrl"] = getItemImgUrl(version, participant.stats.item6);
+
     obj["visionWardsBoughtInGame"] = participant.stats.visionWardsBoughtInGame;
     
     obj["team"] = getParticipantsInfo(match, teamParticipant);
@@ -526,20 +536,8 @@ exports.getAverageStatHTMLText = (total) => {
   let totalGames = total.wins + total.losses,
     winRate = (total.wins / totalGames * 100).toFixed(0),
     killRate = ((total.kills + total.assists) / total.teamTotalKills * 100).toFixed(0);
-
-  let getKDARatio = (kills, deaths, assists) => {
-    if(deaths === 0) {
-      if(kills ===0 && assists === 0 ) {
-        return "0.00:1";
-      } else {
-        return "Perfect";
-      }
-    } else {
-      return ((kills + assists) / deaths).toFixed(2) + ":1";
-    }
-  }
-
-  let KDARatio = getKDARatio(total.kills, total.deaths, total.assists);
+ 
+  let KDARatio = calc.getKDARatio(total.kills, total.deaths, total.assists);
 
   console.log(total);
 
@@ -565,4 +563,266 @@ exports.getAverageStatHTMLText = (total) => {
       </div>
     </div>
   </div>`
+}
+
+exports.getMatchDetailHtml = (version, gameId, accountId) => {
+
+  let getTeamParticipantsData = (match, lolggChampion, teamId, topTotalDamageDealtToChampions) => {
+    // teamId : 100:blue , 200:red
+
+    let participants = match.participants.filter((participant) => {
+      return participant.teamId === teamId;
+    });
+    
+    let datas = [];
+
+    participants.forEach(participant => {
+
+      let participantIdentity = match.participantIdentities.find((data) => {
+        return participant.participantId === data.participantId;
+      });
+
+      let obj = {};
+      
+      obj["championId"] = participant.championId;
+      obj["championId_imgUrl"] = getChampionImgUrl(version, lolggChampion[participant.championId].id);
+
+      obj["champLevel"] = participant.stats.champLevel;
+      obj["spell1Id"] = participant.spell1Id;
+      obj["spell2Id"] = participant.spell2Id;
+
+      obj["perk0"] = participant.stats.perk0;
+      obj["perkSubStyle"] = participant.stats.perkSubStyle;
+
+      obj["summonerName"] = participantIdentity.player.summonerName;
+
+      obj["kills"] = participant.stats.kills;
+      obj["deaths"] = participant.stats.deaths;
+      obj["assists"] = participant.stats.assists;
+
+      obj["killRate"] = calc.getKillRate(participant, participants);
+      obj["KDARatio"] = calc.getKDARatio(obj["kills"], obj["deaths"], obj["assists"]);
+
+      obj["totalDamageDealt"] = participant.stats.totalDamageDealt;
+      obj["totalDamageDealtToChampions"] = participant.stats.totalDamageDealtToChampions;
+      obj["totalDamageDealtToChampionsFill"] = (participant.stats.totalDamageDealtToChampions / topTotalDamageDealtToChampions * 100).toFixed(0);
+
+      obj["wardsKilled"] = participant.stats.wardsKilled ? participant.stats.wardsKilled : 0;
+      obj["wardsPlaced"] = participant.stats.wardsPlaced ? participant.stats.wardsPlaced : 0;
+      obj["visionWardsBoughtInGame"] = participant.stats.visionWardsBoughtInGame ? participant.stats.visionWardsBoughtInGame : 0;
+
+      obj["totalMinionsKilled"] = participant.stats.totalMinionsKilled + participant.stats.neutralMinionsKilled;
+      obj["totalMinionsKilledPerMinute"] = calc.getMinionKilledPerMinute(match.gameDuration, obj["totalMinionsKilled"]);
+      
+      obj["item0"] = participant.stats.item0;
+      obj["item0_imgUrl"] = getItemImgUrl(version, participant.stats.item0);
+      obj["item1"] = participant.stats.item1;
+      obj["item1_imgUrl"] = getItemImgUrl(version, participant.stats.item1);
+      obj["item2"] = participant.stats.item2;
+      obj["item2_imgUrl"] = getItemImgUrl(version, participant.stats.item2);
+      obj["item3"] = participant.stats.item3;
+      obj["item3_imgUrl"] = getItemImgUrl(version, participant.stats.item3);
+      obj["item4"] = participant.stats.item4;
+      obj["item4_imgUrl"] = getItemImgUrl(version, participant.stats.item4);
+      obj["item5"] = participant.stats.item5;
+      obj["item5_imgUrl"] = getItemImgUrl(version, participant.stats.item5);
+      obj["item6"] = participant.stats.item6; // lenze
+      obj["item6_imgUrl"] = getItemImgUrl(version, participant.stats.item6);
+
+      obj["win"] = participant.stats.win;
+      obj["teamId"] = participant.teamId;
+
+      datas.push(obj);
+    });
+
+    return datas;
+
+  }
+
+  let getMyTeamId = (riotMatch, accountId) => {
+    let participantIdentities = riotMatch.participantIdentities;
+    let participantIdentity = participantIdentities.find((participantIdentity) =>  {
+      return participantIdentity.player.accountId === accountId;
+    });
+
+    let participants = riotMatch.participants;
+    let participant = participants.find((participant) => {
+      return participantIdentity.participantId === participant.participantId;
+    });
+    console.log(colors.magenta(participantIdentity.participantId, participant.teamId));
+    return participant.teamId;
+  }
+
+  let getTeamData = (riotMatch, teamId) => {
+    let team = riotMatch.teams.find((team) => {
+      return team.teamId === teamId;
+    });
+
+    let obj = {};
+    obj["baronKills"] = team.baronKills;
+    obj["dragonKills"] = team.dragonKills;
+    obj["towerKills"] = team.towerKills;
+    
+    let teamKills = 0,
+      teamgGoldEarned = 0,
+      participants = riotMatch.participants;
+
+    participants.forEach((participant) => {
+      if(participant.teamId === teamId) {
+        let stats = participant.stats;
+        teamKills += stats.kills;
+        teamgGoldEarned += stats.goldEarned;
+      }
+    });
+
+    obj["teamKills"] = teamKills;
+    obj["teamgGoldEarned"] = teamgGoldEarned;
+
+    return obj;
+  }
+
+  let getTopTotalDamageDealtToChampions = (riotMatch) => {
+    let participants = riotMatch.participants.slice();
+    return Math.max.apply(Math, participants.map(function(participant) { return participant.stats.totalDamageDealtToChampions; }));
+  }
+
+  let getTeamTableTag = (teamParticipantsData) => {
+
+    let win = teamParticipantsData[0].win,
+      winText = win ? "승리" : "패배",
+      teamId = teamParticipantsData[0].teamId,
+      teamText = (teamId === 100) ? "블루팀" : "레드팀";
+    
+    let colgroup = `
+      <colgroup>
+        <col class="championImage">
+        <col class="summonerSpell">
+        <col class="keystoneMastery">
+        <col class="summonerName">
+        <col class="tier">
+        <col class="score">
+        <col class="KDA">
+        <col class="damage">
+        <col class="ward">
+        <col class="cs">
+        <col class="items">
+      </colgroup>
+    `;
+
+    let thead = `
+      <thead class="header">
+        <tr class="row">
+          <th class="headerCell" colspan="4">
+            <span class="gameResult">${winText}</span>
+            (${teamText})
+          </th>
+          <th class="headerCell">티어</th>
+          <th class="headerCell">OP Score</th>
+          <th class="headerCell">KDA</th>
+          <th class="headerCell">피해량</th>
+          <th class="headerCell">와드</th>
+          <th class="headerCell">CS</th>
+          <th class="headerCell">아이템</th>
+        </tr>
+      </thead>
+    `;
+
+    let trs = "";
+    teamParticipantsData.forEach((participantData) => {
+      
+      let temp = `
+        <tr class="row">
+          <td class="championImage cell">
+            <img class="image" src="${participantData.championId_imgUrl}">
+            <div class="level">${participantData.champLevel}</div>
+          </td>
+          <td class="summonerSpell cell">
+          
+          </td>
+          <td class="rune cell">
+          
+          </td>
+          <td class="summonerName cell">
+            <a href="/summoner/userName=${encodeURI(participantData.summonerName)}">${participantData.summonerName}</a>
+          </td>
+          <td class="tier cell">
+          
+          </td>
+          <td class="score cell">
+          
+          </td>
+          <td class="KDA cell">
+            <span class="KDARatio normal">${participantData.KDARatio}</span>
+            <div class="KDA">
+              <span class="kill">${participantData.kills}</span>
+              /
+              <span class="deaths">${participantData.deaths}</span>
+              /
+              <span class="assists">${participantData.assists}</span>
+            </div>
+          </td>
+          <td class="damage cell">
+            <div class="championDamage">${participantData.totalDamageDealtToChampions}</div>
+            <div class="progress">
+              <div class="fill" style="width: ${participantData.totalDamageDealtToChampionsFill}%"></div>
+            </div>
+          </td>
+          <td class="ward cell">
+            <div>${participantData.visionWardsBoughtInGame}</div>
+            <div>${participantData.wardsPlaced} / ${participantData.wardsKilled}</div>
+          </td>
+          <td class="cs cell">
+            <div class="cs">${participantData.totalMinionsKilled}</div>
+            <div class="CSPerMinute">분당 ${participantData.totalMinionsKilledPerMinute}</div>
+          </td>
+          <td class="items cell">
+            ${getItemTag(participantData.item0, participantData.item0_imgUrl)}
+            ${getItemTag(participantData.item1, participantData.item1_imgUrl)}
+            ${getItemTag(participantData.item2, participantData.item2_imgUrl)}
+            ${getItemTag(participantData.item3, participantData.item3_imgUrl)}
+            ${getItemTag(participantData.item4, participantData.item4_imgUrl)}
+            ${getItemTag(participantData.item5, participantData.item5_imgUrl)}
+            ${getItemTag(participantData.item6, participantData.item6_imgUrl)}
+          </td>
+        </tr>
+      `;
+
+      trs += temp;
+
+    });
+
+    let table = `
+      <table class="gameDetailTable result-${win ? 'win' : 'lose'}">
+        ${colgroup}
+        ${thead}
+        <tbody class="content">
+          ${trs}
+        </tbody>
+      </table>
+    `;
+
+    return table;
+
+  }
+
+  return new Promise((resolve, reject) => {
+    (async() => {
+
+      let riotMatch = await riotAPI.getMatchByMatchId(gameId),
+        lolggChampion = await staticDAO.findOne({type: "champion"});
+
+      let myTeamId = getMyTeamId(riotMatch, accountId),
+        enemyTeamId = (myTeamId === 100) ? 200 : 100,
+        topTotalDamageDealtToChampions = getTopTotalDamageDealtToChampions(riotMatch);
+
+      // 100 for blue side. 200 for red side.
+      let test = getTeamParticipantsData(riotMatch, lolggChampion.data, myTeamId, topTotalDamageDealtToChampions);
+      let test2 = getTeamData(riotMatch, myTeamId);
+
+      let test3 = getTeamTableTag(test);
+            
+      resolve(test3);
+
+    })();
+  });
 }

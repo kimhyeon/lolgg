@@ -150,7 +150,9 @@
 
       },
       matchDetailButton: (event, gameId) => {
-   
+        
+        let accountId = document.querySelector(".main-content").dataset.accountId;
+
         let classList = event.classList,
           openIcon = event.querySelector(".icon.open"),
           closeIcon = event.querySelector(".icon.close"),
@@ -166,7 +168,7 @@
           gameDetail.innerHTML = "";
 
         } else {
-          let url = `/summoner/ajax/detail/gameId=${gameId}`;
+          let url = `/summoner/ajax/detail/gameId=${gameId}&accountId=${accountId}`;
           fetch(url, {
             method: 'get',
             headers: {

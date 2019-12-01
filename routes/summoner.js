@@ -190,11 +190,19 @@ router.get("/ajax/averageAndList/startInfo=:startInfo&accountId=:accountId&type=
   })();
 });
 
-router.get("/ajax/detail/gameId=:gameId", (req, res) => {
+router.get("/ajax/detail/gameId=:gameId&accountId=:accountId", (req, res) => {
 
-  let gameId = req.params.gameId;
-  res.json({result: 1, html: `<h3>game id  : ${gameId}</h3>`})
+  (async() => {
+    let gameId = req.params.gameId,
+      accountId = req.params.accountId,
+      version = await staticService.getVersion();
 
+    console.log(colors.magenta(gameId, accountId, version));
+
+    let html = await matchService.getMatchDetailHtml(version, gameId, accountId);
+    res.json({result: 1, html: html});
+  })();
+  
 });
 
 

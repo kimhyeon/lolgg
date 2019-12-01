@@ -168,3 +168,44 @@ html:lang(ko_KR) .menu__item{letter-spacing:-0.5px;}
 .errorBox{position: relative;}
 .errorBox .errorIcon{position: absolute;top: 50%;right:50%;transform:translate(50%,-85%);}
 .errorBox .errorMessage{display:block;padding:126px 0 60px;text-align:center;font-size:16px;color:#555e5e;}
+
+.gameDetailTable{width:100%;table-layout:fixed;border-collapse: collapse;border-spacing: 0;}
+.gameDetailTable colgroup .championImage{width:44px;}
+.gameDetailTable colgroup .summonerSpell{width:18px;}
+.gameDetailTable colgroup .keystoneMastery{width:18px;}
+.gameDetailTable colgroup .summonerName{width:74px;}
+.gameDetailTable colgroup .tier{width:65px;}
+.gameDetailTable colgroup .score{width:55px;}
+.gameDetailTable colgroup .KDA{width:76px;}
+.gameDetailTable colgroup .damage{width:66px;}
+.gameDetailTable colgroup .ward{width:48px;}
+.gameDetailTable colgroup .cs{width:55px;}
+.gameDetailTable colgroup .items{width:170px;}
+
+.gameDetailTable thead .headerCell{height:32px;color: #555e5e;font-size: 12px;font-weight: normal;}
+.gameDetailTable.result-win thead .headerCell .gameResult{color:#1a78ae;font-size:13px;font-weight:bold;}
+.gameDetailTable.result-lose thead .headerCell .gameResult{color:#c6443e;font-size:13px;font-weight:bold;}
+
+.gameDetailTable.result-win > .content{background-color: #d8e4ec;border: solid 1px #bacedc;}
+.gameDetailTable.result-lose > .content{background-color: #e9e0e0;border: solid 1px #d8c0be;}
+
+.gameDetailTable > .content > .row > .cell{padding:3px 0;vertical-align: middle;}
+.gameDetailTable > .content .championImage.cell{padding-top:4px;padding-left:10px;padding-right:4px;position:relative;}
+.gameDetailTable > .content .championImage.cell img{display:block;width:32px;height:32px;border-radius:50%;}
+.gameDetailTable > .content .championImage.cell div.level{position: absolute;left: 5px;bottom: 1px;width: 15px;height: 15px;color:#ddd;font-size:10px;font-family:"Tahoma";text-align: center;line-height: 15px;background-color:#000;border-radius: 50%;opacity: 0.8;}
+.gameDetailTable > .content .summonerName.cell{padding-left:5px;white-space: nowrap;text-overflow:ellipsis;overflow:hidden;}
+.gameDetailTable > .content .summonerName.cell a{color:#555e5e;font-size:11px;text-decoration:none;}
+.gameDetailTable > .content .KDA.cell{text-align: center;white-space: nowrap;}
+.gameDetailTable > .content .KDA.cell .KDARatio{color: #879292;font-size: 11px;font-weight: bold;}
+.gameDetailTable > .content .KDA.cell .KDA{color: #555e5e;font-size: 11px;}
+.gameDetailTable > .content .damage.cell{text-align: center;}
+.gameDetailTable > .content .damage.cell .championDamage{color: #555e5e;font-size: 11px;}
+.gameDetailTable > .content .damage.cell .progress{width: 50px;height: 6px;margin: 0 auto;border: 1px solid #cdd2d2;background-color: #f2f2f2;}
+.gameDetailTable > .content .damage.cell .progress .fill{height: 100%;margin: -1px;border: 1px solid #c6443e;background-color: #ee5a52;}
+.gameDetailTable > .content .ward.cell{text-align: center;color: #555e5e;font-size: 11px;}
+.gameDetailTable > .content .cs.cell{text-align: center;color: #777;font-size: 11px;}
+.gameDetailTable > .content .items.cell{text-align:center;font-size:0;}
+.gameDetailTable > .content .items.cell .item{display:inline-block;width: 22px;height: 22px;margin-left: 1px;vertical-align: middle;}
+.gameDetailTable > .content .items.cell .item:first-child{margin-left:0;}
+.gameDetailTable > .content .items.cell .item img{width:100%;height:100%;}
+.gameDetailTable > .content .items.cell .item .noitem{width:100%;height:100%;background-color:#D2CBCB;border-radius:3px;}
