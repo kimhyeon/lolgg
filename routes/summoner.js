@@ -82,7 +82,7 @@ router.get('/userName=:name', (req, res, next) => {
               version = await staticService.getVersion();
   
             let matches = matchlist.matches,
-              mainContentHTMLText = await htmlService.getMainContentHtml(req, dbSummoner.accountId, version, matches, 0),
+              mainContentHTMLText = await htmlService.getMainContentHtml(req, summoner.accountId, version, matches, 0),
               tierBoxes = await summonerService.getTierBoxesHTMLText(summoner);
 
             let resData = summonerService.getSummonerResponse(summoner, tierBoxes, mainContentHTMLText);
@@ -203,6 +203,25 @@ router.get("/ajax/detail/gameId=:gameId&accountId=:accountId", (req, res) => {
     res.json({result: 1, html: html});
   })();
   
+});
+
+router.get("/ajax/autocomplete/name=:name", (req, res) => {
+
+  (async() => {
+    let name = req.params.name;
+    console.log(colors.cyan(name));
+    let datas = await summonerService.getAutocompleteDatas(name);
+
+    if(datas.length === 0) {
+      res.status(404);
+    } else {
+      res.status(200);
+    }
+
+    res.json({result:1, data:datas});
+
+  })();
+
 });
 
 

@@ -54,20 +54,6 @@ exports.saveRiotSummoner = async (name) => {
 
 }
 
-// exports.getSummonerResponse = (summoner, tierBoxes, matchesHTMLText) => {
-  
-//   let resData = {
-//     searchForm: true,
-//     summoner: summoner,
-//     border: (summoner.tier === "grandmaster") ? "master" : summoner.tier,
-//     tierBoxes: tierBoxes,
-//     matchItemList: matchesHTMLText
-//   };
-
-//   return resData;
-
-// }
-
 exports.getSummonerResponse = (summoner, tierBoxes, mainContentHTMLText) => {
   
   let resData = {
@@ -167,4 +153,49 @@ exports.getTierBoxesHTMLText = (summoner) => {
 
 }
 
+exports.getAutocompleteDatas = (name) => {
 
+  let getDatas = (summoners) => {
+
+    let datas = [];
+
+    summoners.forEach((summoner) => {
+      
+      let displayName = summoner.name.replace(name, `<b>${name}</b>`),
+        displayTier = summoner.tier[0].toUpperCase() + summoner.tier.slice(1);
+
+      let data = {};
+
+      data["summoner"] = summoner.name;
+      data["tag"] = `
+        <div class="autocomplete-suggestion" onclick="location.href = '/summoner/userName=${summoner.name}';">
+          <img src="https://opgg-static.akamaized.net/images/profile_icons/profileIcon${summoner.profileIconId}.jpg">
+          <div>
+            <div class="name">${displayName}</div>
+            <div class="tier">${displayTier}</div>
+          </div>
+        </div>
+      `;
+
+      datas.push(data);
+    });
+    return datas;
+  }
+
+  return new Promise((resolve, reject) => {
+    (async() => {
+      try {
+        let summoners = await summonerDAO.find({name:{$regex:`^${name}`}}, {limit:5});
+        if(summoners.length === 0) {
+          resolve(summoners);
+        } 
+
+        resolve(getDatas(summoners));
+
+      } catch(err) {
+        reject(err);
+      }
+    })();
+
+  });
+}

@@ -11,6 +11,7 @@ exports.getMatchesHTMLText = (req, accountId, version, matchlist) => {
     (async () => {
 
       let lolggChampion = await staticDAO.findOne({type: "champion"}),
+        lolggSummoner = await staticDAO.findOne({type: "summoner"}),
         matches = [];
       try {
         for(let i in matchlist) {
@@ -34,7 +35,7 @@ exports.getMatchesHTMLText = (req, accountId, version, matchlist) => {
         
         // working here !!!!
         // console.log(colors.cyan(`${accountId} ${version} ${matches.length} ${matchlist.length}`))
-        resolve(getHTMLText(req, accountId, version, matches, lolggChampion.data));
+        resolve(getHTMLText(req, accountId, version, matches, lolggChampion.data, lolggSummoner.data));
 
       } catch(err) {
         reject(err);
@@ -47,6 +48,10 @@ exports.getMatchesHTMLText = (req, accountId, version, matchlist) => {
 
 let getChampionImgUrl = (version, championId) => {
   return `http://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${championId}.png`;
+}
+
+let getSpellImgUrl = (version, spellId) => {
+  return `http://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${spellId}.png`;
 }
 
 let getItemImgUrl = (version, item) => {
@@ -96,9 +101,9 @@ let calc = {
   }
 }
 
-let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
+let getHTMLText = (req, accountId, version, matches, lolggChampion, lolggSummoner) => {
 
-  let gamesData = getGamesData(accountId, version, matches, lolggChampion);
+  let gamesData = getGamesData(accountId, version, matches, lolggChampion, lolggSummoner, lolggSummoner);
   
   let gameItemHTMLText = (game) => {
     
@@ -137,14 +142,15 @@ let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
     gameSettingInfo += championImage;
 
     // ** summoner json 처리 DB 필요!!!!!
-    // let summonerSpell = tag("div", {class: "summonerSpell"}, false);
-    // summonerSpell += tag("div", {class: "spell"}, false);
-    // summonerSpell += tag("img", {src: game.championId_imgUrl, class: "image"});
-    // summonerSpell += "</div>";
-    // summonerSpell += tag("div", {class: "spell"}, false);
-    // summonerSpell += tag("img", {src: game.championId_imgUrl, class: "image"});
-    // summonerSpell += "</div>";
-    // summonerSpell += "</div>";
+    let summonerSpell = tag("div", {class: "summonerSpell"}, false);
+    summonerSpell += tag("div", {class: "spell"}, false);
+    summonerSpell += tag("img", {src: game.spell1Id_imgUrl, class: "image"});
+    summonerSpell += "</div>";
+    summonerSpell += tag("div", {class: "spell"}, false);
+    summonerSpell += tag("img", {src: game.spell2Id_imgUrl, class: "image"});
+    summonerSpell += "</div>";
+    summonerSpell += "</div>";
+    gameSettingInfo += summonerSpell;
     
     // let runes = tag("div", {class: "runes"}, false);
     // runes += tag("div", {class: "rune"}, false);
@@ -345,7 +351,7 @@ let getHTMLText = (req, accountId, version, matches, lolggChampion) => {
     
 }
 
-let getGamesData = (accountId, version, matches, lolggChampion) => {
+let getGamesData = (accountId, version, matches, lolggChampion, lolggSummoner) => {
   
   let list = [],
     queueName = {
@@ -474,9 +480,12 @@ let getGamesData = (accountId, version, matches, lolggChampion) => {
     obj["championName"] = lolggChampion[participant.championId].name;
     obj["championId"] = lolggChampion[participant.championId].id;
     obj["championId_imgUrl"] = getChampionImgUrl(version, lolggChampion[participant.championId].id);
-    
+
     obj["spell1Id"] = participant.spell1Id;
+    obj["spell1Id_imgUrl"] = getSpellImgUrl(version, lolggSummoner[participant.spell1Id].id);
     obj["spell2Id"] = participant.spell2Id;
+    obj["spell2Id_imgUrl"] = getSpellImgUrl(version, lolggSummoner[participant.spell2Id].id);
+
     obj["perk0"] = participant.stats.perk0;
     obj["perkSubStyle"] = participant.stats.perkSubStyle;
     
@@ -567,7 +576,7 @@ exports.getAverageStatHTMLText = (total) => {
 
 exports.getMatchDetailHtml = (version, gameId, accountId) => {
 
-  let getTeamParticipantsData = (match, lolggChampion, teamId, topTotalDamageDealtToChampions) => {
+  let getTeamParticipantsData = (match, lolggChampion, lolggSummoner, teamId, topTotalDamageDealtToChampions) => {
     // teamId : 100:blue , 200:red
 
     let participants = match.participants.filter((participant) => {
@@ -588,8 +597,11 @@ exports.getMatchDetailHtml = (version, gameId, accountId) => {
       obj["championId_imgUrl"] = getChampionImgUrl(version, lolggChampion[participant.championId].id);
 
       obj["champLevel"] = participant.stats.champLevel;
+
       obj["spell1Id"] = participant.spell1Id;
+      obj["spell1Id_imgUrl"] = getSpellImgUrl(version, lolggSummoner[participant.spell1Id].id);
       obj["spell2Id"] = participant.spell2Id;
+      obj["spell2Id_imgUrl"] = getSpellImgUrl(version, lolggSummoner[participant.spell2Id].id);
 
       obj["perk0"] = participant.stats.perk0;
       obj["perkSubStyle"] = participant.stats.perkSubStyle;
@@ -659,6 +671,8 @@ exports.getMatchDetailHtml = (version, gameId, accountId) => {
     });
 
     let obj = {};
+    obj["teamId"] = team.teamId;
+    obj["win"] = team.win;
     obj["baronKills"] = team.baronKills;
     obj["dragonKills"] = team.dragonKills;
     obj["towerKills"] = team.towerKills;
@@ -700,7 +714,6 @@ exports.getMatchDetailHtml = (version, gameId, accountId) => {
         <col class="keystoneMastery">
         <col class="summonerName">
         <col class="tier">
-        <col class="score">
         <col class="KDA">
         <col class="damage">
         <col class="ward">
@@ -717,7 +730,6 @@ exports.getMatchDetailHtml = (version, gameId, accountId) => {
             (${teamText})
           </th>
           <th class="headerCell">티어</th>
-          <th class="headerCell">OP Score</th>
           <th class="headerCell">KDA</th>
           <th class="headerCell">피해량</th>
           <th class="headerCell">와드</th>
@@ -737,7 +749,8 @@ exports.getMatchDetailHtml = (version, gameId, accountId) => {
             <div class="level">${participantData.champLevel}</div>
           </td>
           <td class="summonerSpell cell">
-          
+            <img src="${participantData.spell1Id_imgUrl}">
+            <img src="${participantData.spell2Id_imgUrl}">
           </td>
           <td class="rune cell">
           
@@ -746,9 +759,6 @@ exports.getMatchDetailHtml = (version, gameId, accountId) => {
             <a href="/summoner/userName=${encodeURI(participantData.summonerName)}">${participantData.summonerName}</a>
           </td>
           <td class="tier cell">
-          
-          </td>
-          <td class="score cell">
           
           </td>
           <td class="KDA cell">
@@ -805,23 +815,91 @@ exports.getMatchDetailHtml = (version, gameId, accountId) => {
 
   }
 
+  let getSummaryTag = (myTeam, enemyTeam) => {
+    
+    let getTeamResultTag = (team) => {
+      let winOrLose = (team.win === "Win") ? "win" : "lose";
+      return `
+        <div class="team result-${winOrLose}">
+          <div class="objectScore">
+            <img src="/images/icon/icon-baron-${winOrLose}.png">
+            ${team.baronKills}
+          </div>
+          <div class="objectScore">
+            <img src="/images/icon/icon-dragon-${winOrLose}.png">
+            ${team.dragonKills}
+          </div>
+          <div class="objectScore">
+            <img src="/images/icon/icon-tower-${winOrLose}.png">
+            ${team.towerKills}
+          </div>
+        </div>
+      `;
+    }
+
+    let myTeamResult = getTeamResultTag(myTeam);
+    let enemyTeamResult = getTeamResultTag(enemyTeam);
+
+    let totalKillTag = `
+      <div class="total-container">
+        <div class="text graph-title">Total Kill</div>
+        <div class="text graph-data left">${myTeam.teamKills}</div>
+        <div class="graph-container">
+          <div class="graph team-${(myTeam.win === "Win")?"win":"lose"}" style="flex:${myTeam.teamKills}"></div>
+          <div class="graph team-${(enemyTeam.win === "Win")?"win":"lose"}" style="flex:${enemyTeam.teamKills}"></div>
+        </div>
+        <div class="text graph-data right">${enemyTeam.teamKills}</div>
+      </div>
+    `;
+
+    let totalGoldTag = `
+      <div class="total-container">
+        <div class="text graph-title">Total Gold</div>
+        <div class="text graph-data left">${myTeam.teamgGoldEarned}</div>
+        <div class="graph-container">
+          <div class="graph team-${(myTeam.win === "Win")?"win":"lose"}" style="flex:${myTeam.teamgGoldEarned}"></div>
+          <div class="graph team-${(enemyTeam.win === "Win")?"win":"lose"}" style="flex:${enemyTeam.teamgGoldEarned}"></div>
+        </div>
+        <div class="text graph-data right">${enemyTeam.teamgGoldEarned}</div>
+      </div>
+    `;
+
+    return `
+      <div class="summary">
+        ${myTeamResult}
+        <div class="summary-graph">
+          ${totalKillTag}
+          ${totalGoldTag}
+        </div>
+        ${enemyTeamResult}
+      </div>
+    `;
+
+  };
+
   return new Promise((resolve, reject) => {
     (async() => {
 
       let riotMatch = await riotAPI.getMatchByMatchId(gameId),
-        lolggChampion = await staticDAO.findOne({type: "champion"});
+        lolggChampion = await staticDAO.findOne({type: "champion"}),
+        lolggSummoner = await staticDAO.findOne({type: "summoner"});
 
       let myTeamId = getMyTeamId(riotMatch, accountId),
         enemyTeamId = (myTeamId === 100) ? 200 : 100,
         topTotalDamageDealtToChampions = getTopTotalDamageDealtToChampions(riotMatch);
 
       // 100 for blue side. 200 for red side.
-      let test = getTeamParticipantsData(riotMatch, lolggChampion.data, myTeamId, topTotalDamageDealtToChampions);
-      let test2 = getTeamData(riotMatch, myTeamId);
+      let myTeamParticipants = getTeamParticipantsData(riotMatch, lolggChampion.data, lolggSummoner.data, myTeamId, topTotalDamageDealtToChampions),
+        myTeam = getTeamData(riotMatch, myTeamId),
+        myTeamTable = getTeamTableTag(myTeamParticipants);
 
-      let test3 = getTeamTableTag(test);
-            
-      resolve(test3);
+      let enemyTeamParticipants = getTeamParticipantsData(riotMatch, lolggChampion.data, lolggSummoner.data, enemyTeamId, topTotalDamageDealtToChampions),
+        enemyTeam = getTeamData(riotMatch, enemyTeamId),
+        enemyTeamTable = getTeamTableTag(enemyTeamParticipants);
+
+      let summary = getSummaryTag(myTeam, enemyTeam);
+      
+      resolve(myTeamTable+summary+enemyTeamTable);
 
     })();
   });

@@ -308,6 +308,7 @@
 
 </body>
 
+<script src="/javascripts/common.js"></script>
 <script>
 
 // game list navigation tabs
@@ -447,6 +448,66 @@
   });
 
 })();
+
+// auto complete
+common.documentReady(()=>{
+  let searchInput = document.querySelector("form.gnb-list-item__search-form input[name=userName]"),
+    container = document.querySelector(".summoner-search-extra .autoComplete");
+  
+  let clear = () => {
+    container.style.display = "none";
+
+    let nodes = document.querySelectorAll(".summoner-search-extra .autoComplete > div");
+    for(let i = 0; i < nodes.length; i++) {
+      nodes[i].remove();
+    }
+  }
+  
+  // searchInput.addEventListener("blur", (event) => {
+  //   clear();
+  // });
+
+  searchInput.addEventListener("keyup", (event) => {
+    let name = searchInput.value;
+    
+    if(name === "") {
+      clear();
+    }
+
+    if(event.code !== "Enter" && name) {
+      let url = `/summoner/ajax/autocomplete/name=${name}`;
+      fetch(url, {
+        method: 'get',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+      })
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        let datas = json.data;
+        
+        clear();
+        console.warn(json);
+
+        if(datas.length > 0) {
+          container.style.display = "block";
+
+          let tagString = "";
+          datas.forEach(data => {
+            tagString += data.tag;
+          });
+          container.insertAdjacentHTML("afterbegin", tagString);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    }
+  });
+});
 
 </script>
 

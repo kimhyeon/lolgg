@@ -75,3 +75,15 @@ exports.updateOne = (accountId, summoner) => {
     });
   });
 }
+
+exports.find = (query, projection) => {
+  return new Promise((resolve, reject) => {
+    summonerModel.find(query, null, projection, (err, summoner) => {
+      if(err) {
+        reject(err);
+      } else {
+        resolve(summoner);
+      }
+    });
+  });
+}
