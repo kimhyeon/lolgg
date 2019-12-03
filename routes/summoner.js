@@ -150,7 +150,7 @@ router.post("/ajax/renew.json/", (req, res) => {
 
           let tierBoxes = summonerService.getTierBoxesHTMLText(riotSummoner);
 
-          res.json({result: 1, tierBoxes: tierBoxes, mainContentHTMLText: mainContentHTMLText});
+          res.json({result: 1, data:true, tierBoxes: tierBoxes, mainContentHTMLText: mainContentHTMLText, totalInfo: req.totalInfo});
 
         }
         
@@ -210,7 +210,7 @@ router.get("/ajax/autocomplete/name=:name", (req, res) => {
   (async() => {
     let name = req.params.name;
     console.log(colors.cyan(name));
-    let datas = await summonerService.getAutocompleteDatas(name);
+    let datas = await summonerService.getAutocompleteDatas(name.toUpperCase());
 
     if(datas.length === 0) {
       res.status(404);

@@ -185,7 +185,7 @@ exports.getAutocompleteDatas = (name) => {
   return new Promise((resolve, reject) => {
     (async() => {
       try {
-        let summoners = await summonerDAO.find({name:{$regex:`^${name}`}}, {limit:5});
+        let summoners = await summonerDAO.find({upperCaseName:{$regex:`^${name}`}}, {limit:5});
         if(summoners.length === 0) {
           resolve(summoners);
         } 

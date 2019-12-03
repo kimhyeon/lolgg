@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>TEST</title>
+  <title>LOL 전적검색 LOL.GG</title>
   <link rel='stylesheet' href='/stylesheets/common.css'/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" />  <script src="/chartjs/Chart.js"></script>
 </head>
@@ -74,6 +74,8 @@
         averageData.assists = data.assists;
         averageData.teamTotalKills = data.teamTotalKills;
 
+        console.log("###", document.getElementById('matchGraph'));
+
         let ctx = document.getElementById('matchGraph').getContext('2d');
         matchGraph = new Chart(ctx, {
             type: 'pie',
@@ -104,6 +106,8 @@
               legend: {display: false,},
             }
         });
+
+        console.warn("initMatchGraph", ctx, matchGraph);
         
       },
       updateMatchGraphAndStats: (data) => {
@@ -420,6 +424,22 @@
         }
         // add tierBoxes
         sideContent.insertAdjacentHTML("afterbegin", json.tierBoxes);
+
+        // clear main-content__body
+        let nodes = document.querySelectorAll(".main-content__body > div");
+        for(let i = 0; i < nodes.length; i++) {
+          nodes[i].remove();
+        }
+
+        // set main-content__body
+        let container = document.querySelector(".main-content__body");
+        container.insertAdjacentHTML("afterbegin", json.mainContentHTMLText);
+        
+        if(json.data) {
+          setTimeout(() => {
+            lolgg.initMatchGraph(json.totalInfo);
+          }, 10);
+        }
         
       }
 
