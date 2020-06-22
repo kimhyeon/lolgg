@@ -1,23 +1,22 @@
 const colors = require('colors');
-const summonerModel = require('../model/summoner');
+const summonerModel = require('../model/Summoner');
 
-exports.findOne = (query) => {
+exports.findOne = query => {
   return new Promise((resolve, reject) => {
     summonerModel.findOne(query, (err, summoner) => {
-      if(err) {
+      if (err) {
         reject(err);
       } else {
         resolve(summoner);
       }
     });
   });
-}
+};
 
 exports.save = (summoner, leagueEntries) => {
-
-  let tier = "";
-  leagueEntries.forEach((leagueEntrie) => {
-    if(leagueEntrie.queueType === "RANKED_SOLO_5x5") {
+  let tier = '';
+  leagueEntries.forEach(leagueEntrie => {
+    if (leagueEntrie.queueType === 'RANKED_SOLO_5x5') {
       tier = leagueEntrie.tier.toLocaleLowerCase();
     }
   });
@@ -37,53 +36,48 @@ exports.save = (summoner, leagueEntries) => {
   });
 
   return new Promise((resolve, reject) => {
-
     newSummoner.save((err, summoner) => {
-      if(err) return console.error(err);
+      if (err) return console.error(err);
       console.log(colors.blue(summoner));
-      
-      if(err) {
+
+      if (err) {
         console.log(colors.red(err));
         reject(err);
       } else {
         resolve(summoner);
       }
-  
     });
-
   });
-
-}
+};
 
 exports.updateOne = (accountId, summoner) => {
-
-  let tier = "";
-  summoner.leagueEntries.forEach((leagueEntrie) => {
-    if(leagueEntrie.queueType === "RANKED_SOLO_5x5") {
+  let tier = '';
+  summoner.leagueEntries.forEach(leagueEntrie => {
+    if (leagueEntrie.queueType === 'RANKED_SOLO_5x5') {
       tier = leagueEntrie.tier.toLocaleLowerCase();
     }
   });
-  summoner["tier"] = tier;
+  summoner['tier'] = tier;
 
   return new Promise((resolve, reject) => {
-    summonerModel.updateOne({accountId: accountId}, summoner, (err, result) => {
-      if(err) {
+    summonerModel.updateOne({ accountId: accountId }, summoner, (err, result) => {
+      if (err) {
         reject(err);
       } else {
         resolve(result);
       }
     });
   });
-}
+};
 
 exports.find = (query, projection) => {
   return new Promise((resolve, reject) => {
     summonerModel.find(query, null, projection, (err, summoner) => {
-      if(err) {
+      if (err) {
         reject(err);
       } else {
         resolve(summoner);
       }
     });
   });
-}
+};
